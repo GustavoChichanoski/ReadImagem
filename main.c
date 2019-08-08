@@ -14,6 +14,7 @@ int main(){
     long ll;
     short ss;
     char *file_image = "lena.bmp";
+    char *out_image = "anel.bmp";
     bmpfileheader file_header;
     bitmapheader bmp_header;
 
@@ -26,21 +27,25 @@ int main(){
         return 1;
     }
 
-    uss = file_header.filetype;
-    printf("Assinatura: %i\n",uss);
+    printf("Assinatura: %i\n",file_header.filetype);
+    printf("Tamanho do arquivo: %ld\n",file_header.filesize);
+    printf("Offset: %lu \n\n",file_header.offset);
 
-    ull = file_header.filesize;
-    printf("Tamanho do arquivo: %lu\n",ull);
+    if(read_bmp_header(file_image,&bmp_header) == 1){
+        printf("Informações sobre a imagem não lidas\n");
+        return 1;
+    }
 
-    ull = file_header.offset;
-    printf("Offset: %lu \n",ull);
+    printf("Tamanho do header da imagem: %lu \n",bmp_header.size);
+    printf("width: %ld\n",bmp_header.width);
+    printf("height: %ld\n",bmp_header.height);
+    printf("planes: %i\n",bmp_header.planes);
+    printf("size of bitmap: %lu\n",bmp_header.sizeofbitmap);
+    printf("Bit per pixel: %u\n",bmp_header.bitsperpixel);
+    printf("compression: %lu\n",bmp_header.compression);
 
-    read_bmp_header(file_image,&bmp_header);
-    uss = bmp_header.bitsperpixel;
-    printf("Bit per pixel: %u\n",uss);
-
-    ull = bmp_header.compression;
-    printf("compression: %lu\n",ull);
+    int pad = calculate_pad(bmp_header.width);
+    printf("pad: %i\n",pad);
 
     return 0;
 

@@ -154,6 +154,9 @@ typedef struct {
 
 int read_bmp_header(char *file_name,bitmapheader *bmp_header);
 int read_bmp_file_header(char *file_name,bmpfileheader *file_header);
+int read_color_table(char *file_name,ctstruct *rgb, int size,int offset);
+int calculate_pad(long width);
+int is_a_bmp(char *file_name);
 
 #ifdef __cplusplus
 }

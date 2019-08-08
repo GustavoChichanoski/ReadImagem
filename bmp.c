@@ -18,15 +18,9 @@ int read_bmp_file_header(char *file_name,bmpfileheader *file_header){
         return 1;
     }
 
-    printf("Arquivo: '%s' encontrado\n",file_name);
-    printf("filetype: %i\n",file_header->filetype);
-
     fread(buffer,1,2,fp);
-    printf("Assinatura lida\n");
     extract_ushort_from_buffer(buffer,1,0,&uss);
-    printf("Assinatura: %u\n",uss);
-    (*file_header).filetype = uss;
-    printf("Assinatura armazenada: %u\n",file_header->filetype);
+    file_header->filetype = uss;
 
     fread(buffer,1,4,fp);
     extract_ulong_from_buffer(buffer,1,0,&ull);
@@ -41,8 +35,13 @@ int read_bmp_file_header(char *file_name,bmpfileheader *file_header){
     file_header->reserved2 = ss;
 
     fread(buffer,1,4,fp);
-    extract_ulong_from_buffer(buffer,1,0,&ull);
+    extract_ulong_from_buffer(buffer, 1, 0, &ull);
     file_header->offset = ull;
+
+    if(ull != 54){
+        printf("Arquivo corrompido");
+        return 1;
+    }
 
     fclose(fp);
 
@@ -59,22 +58,17 @@ int read_bmp_header(char *file_name,bitmapheader *bmp_header){
     unsigned long ull;
     FILE *fp;
 
-    printf("Abrindo o arquivo\n");
-
-    fp = fopen(file_name,"rb");
+    if((fp = fopen(file_name,"rb")) == NULL){
+        printf("Arquivo: %s não encontrado\n",file_name);
+        return 1;
+    }
     fseek(fp,14,SEEK_SET);
 
-    printf("Mudando o cursor para 14\n");
-
     fread(buffer,1,4,fp);
-    printf("Tamanho da imagem lida\n");
     extract_ulong_from_buffer(buffer,1,0,&ull);
-    printf("Valor convertido\n");
     bmp_header->size = ull;
-    printf("Valor recebido\n");
 
     fread(buffer,1,4,fp);
-    printf("Comprimento da imagem lida\n");
     extract_long_from_buffer(buffer,1,0,&ll);
     bmp_header->width = ll;
 
@@ -100,10 +94,76 @@ int read_bmp_header(char *file_name,bitmapheader *bmp_header){
 
     fread(buffer,1,4,fp);
     extract_ulong_from_buffer(buffer,1,0,&ull);
-    bmp_header->sizeofbitmap = ull;
+    bmp_header->horzres = ull;
+
+    fread(buffer,1,4,fp);
+    extract_ulong_from_buffer(buffer,1,0,&ull);
+    bmp_header->vertres = ull;
+
+    fread(buffer,1,4,fp);
+    extract_ulong_from_buffer(buffer,1,0,&ull);
+    bmp_header->colorsused = ull;
+
+    fread(buffer,1,4,fp);
+    extract_ulong_from_buffer(buffer,1,0,&ull);
+    bmp_header->colorsimp = ull;
+
+    fclose(fp);
+
+    return 0;
+
+}
+
+int read_color_table(char *file_name,ctstruct *rgb, int size,int offset){
+    int i;
+    char buffer[10];
+    FILE *fp;
+
+    fp = fopen(file_name,"rb");
+    fseek(fp,offset,SEEK_SET);
+
+    for(i = 0;i < size;i++){
+        fread(buffer,1,1,fp);
+        rgb[i].blue = buffer[0];
+        fread(buffer,1,1,fp);
+        rgb[i].green = buffer[0];
+        fread(buffer,1,1,fp);
+        rgb[i].blue = buffer[0];
+    }
 
     fclose(fp);
 
     return 1;
+
+}
+
+/* calculte_pad(...)
+ * Calcula o pad necessário para cada linha de pixel no bitmap */
+int calculate_pad(long width){
+
+    int pad = 0;
+
+    pad = ((width%4) == 0) ? 0 : (4 - (width%4));
+
+    return pad;
+
+}
+
+int is_a_bmp(char *file_name){
+    char *cc;
+    bmpfileheader file_header;
+
+    cc = strstr(file_name,".bmp");
+    if(cc == NULL){
+        return 0;
+    }
+
+    read_bmp_file_header(file_name,&file_header);
+
+    if(file_header.filetype != 0x4D42){
+        return 0;
+    } else {
+        return 1;
+    }
 
 }
