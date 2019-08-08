@@ -4,6 +4,8 @@
 #include "conversao.h"
 #include "bmp.h"
 
+#define GRAY_LEVELS 256
+
 int read_bmp_file_header(char *file_name,bmpfileheader *file_header){
 
     char buffer[10];
@@ -62,6 +64,7 @@ int read_bmp_header(char *file_name,bitmapheader *bmp_header){
         printf("Arquivo: %s não encontrado\n",file_name);
         return 1;
     }
+
     fseek(fp,14,SEEK_SET);
 
     fread(buffer,1,4,fp);
@@ -114,31 +117,64 @@ int read_bmp_header(char *file_name,bitmapheader *bmp_header){
 
 }
 
-int read_color_table(char *file_name,ctstruct *rgb, int size,int offset){
-    int i;
-    char buffer[10];
+int read_bmp_image(char *file_name,ctstruct **array){
+
     FILE *fp;
+    int x,y, negative = 0, pad = 0, place = 0,i;
+    long colors = 0, height = 0, width = 0, position = 0;
+    char buffer[10];
+    bmpfileheader file_header;
+    bitmapheader bmheader;
+    ctstruct rgb[GRAY_LEVELS+1];
+    unsigned char uc;
+    long ll;
+
+    read_bmp_file_header(file_name,&file_header);
+    read_bmp_header(file_name,&bmheader);
 
     fp = fopen(file_name,"rb");
-    fseek(fp,offset,SEEK_SET);
+    fseek(fp,file_header.offset,SEEK_SET);
 
-    for(i = 0;i < size;i++){
-        fread(buffer,1,1,fp);
-        rgb[i].blue = buffer[0];
-        fread(buffer,1,1,fp);
-        rgb[i].green = buffer[0];
-        fread(buffer,1,1,fp);
-        rgb[i].blue = buffer[0];
+    width = bmheader.width;
+
+    if(bmheader.compression != 0){
+        exit(1);
     }
 
-    fclose(fp);
+    if(bmheader.height < 0){
+        height = bmheader.height*(-1);
+        negative = 1;
+    } else {
+        height = bmheader.height;
+    }
 
-    return 1;
+    pad = calculate_pad(width);
+
+    for(y = height;y >= 0;y--){
+        for(x = 0;x < width;x++){
+            fread(buffer,1,3,fp);
+            extract_long_from_buffer(buffer,1,0,&ll);
+            array[y][x].blue = ll;
+            fread(buffer,1,3,fp);
+            extract_long_from_buffer(buffer,1,0,&ll);
+            array[y][x].green = ll;
+            fread(buffer,1,3,fp);
+            extract_long_from_buffer(buffer,1,0,&ll);
+            array[y][x].red = ll;
+            for(i = 0; i < pad; i++){
+                fread(buffer,1,1,fp);
+            }
+        }
+    }
+
+    return 0;
 
 }
 
 /* calculte_pad(...)
- * Calcula o pad necessário para cada linha de pixel no bitmap */
+ * Verifica se a largura da imagem é um numero divisivel por
+ * 4, se for não adiciona pads. Caso seja diferente, indica
+ * o números de bytes adicionados para completar essa regra */
 int calculate_pad(long width){
 
     int pad = 0;
@@ -148,8 +184,12 @@ int calculate_pad(long width){
     return pad;
 
 }
-
+/* is_a_bmp(...)
+ * This function looks at a file to see if it is a bmp file.
+ * First look at the file extension. Next look at the filetype 
+ * to ensure it is 0x4d42 */
 int is_a_bmp(char *file_name){
+
     char *cc;
     bmpfileheader file_header;
 
@@ -165,5 +205,269 @@ int is_a_bmp(char *file_name){
     } else {
         return 1;
     }
+
+}
+
+/* get_bitsperpixel(...)
+ * Essa função lê o bits per pixel */
+int get_bitperpixel(char *file_name,long *bitsperpixel){
+
+    int is_bmp = 0;
+    long temp;
+    bitmapheader bmph;
+
+    if(is_a_bmp(file_name)){
+        is_bmp = 1;
+        read_bmp_header(file_name,&bmph);
+        temp = (long) bmph.bitsperpixel;
+        *bitsperpixel = temp;
+        return 1;
+    }
+
+    return 0;
+
+}
+
+/* does_not_exist(...)
+ * Verifica se o arquivo existe */
+int does_not_exist(char file_name[]){
+
+    FILE *image_file;
+
+    image_file = fopen(file_name,"rb");
+    if(image_file != NULL){
+        fclose(image_file);
+        return 0;
+    }
+
+    return 1;
+
+}
+
+int get_lsb(char *name){
+    if(is_a_bmp(name)){
+        return 1;
+    }
+    return 0;
+}
+
+/* equate_bitmapheaders(...)
+ * Essa função iguala o cabeçalho de dois arquivos */
+int equate_bitmapheaders(bitmapheader *src,bitmapheader *dest){
+    dest->width = src->width;
+    dest->height = src->height;
+    dest->planes = src->planes;
+    dest->bitsperpixel = src->bitsperpixel;
+    dest->compression = src->compression;
+    dest->sizeofbitmap = src->sizeofbitmap;
+    dest->horzres = src->horzres;
+    dest->vertres = src->vertres;
+    dest->colorsused = src->colorsused;
+    dest->colorsimp = src->colorsimp;
+    return 1;
+}
+
+int equate_bmpfileheader(bmpfileheader *src,bmpfileheader *dest){
+    dest->filesize  = src->filesize;
+    dest->filetype  = src->filetype;
+    dest->reserved1 = src->reserved1;
+    dest->reserved2 = src->reserved2;
+    dest->offset    = src->offset;
+    return 1;
+}
+
+int copy_file(char *in_name,char *out_name){
+
+    FILE *in_image, *out_image;
+    bmpfileheader *in_file_header, *out_file_header;
+    bitmapheader *in_bmheader, *out_bmheader;
+
+    in_image = fopen(in_name,"rb");
+    in_image = fopen(out_name,"rb");
+
+    read_bmp_file_header(in_name,&in_file_header);
+    read_bmp_header(in_name,&in_bmheader);
+
+    equate_bmpfileheader(&in_file_header,&out_file_header);
+    equate_bitmapheaders(&in_bmheader,&out_bmheader);
+
+    return 0;
+
+}
+
+int create_allocate_bmp_file(char *in_name,char *out_name,bmp *src,bmp *dest){
+
+    char buffer[100];
+    int i, pad = 0;
+    FILE *fp;
+
+    pad = calculate_pad(src->bmpheader.size);
+
+    dest->bmpheader = src->bmpheader;
+    dest->file_header = src->file_header;
+
+    if((fp = fopen(out_name,"wb")) == NULL){
+        printf("\nERROR: could not create file %s",out_name);
+        exit(2);
+    }
+
+    /* Escreve 14 bytes do cabeçalho bmp */
+    insert_ushort_into_buffer(buffer,0,dest->file_header.filetype);
+    fwrite(buffer,1,2,fp);
+
+    insert_ulong_into_buffer(buffer,0,dest->file_header.filesize);
+    fwrite(buffer, 1, 4, fp);
+
+    insert_short_into_buffer(buffer,0,dest->file_header.reserved1);
+    fwrite(buffer, 1, 2, fp);
+
+    insert_short_into_buffer(buffer,0,dest->file_header.reserved2);
+    fwrite(buffer, 1, 2, fp);
+
+    insert_ulong_into_buffer(buffer, 0,dest->file_header.offset);
+    fwrite(buffer, 1, 4, fp);
+
+    /* Escreve os 40 bytes do cabeçalho da imagem */
+    insert_ulong_into_buffer(buffer,0,dest->bmpheader.size);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_long_into_buffer(buffer,0,dest->bmpheader.width);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_long_into_buffer(buffer,0,dest->bmpheader.height);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ushort_into_buffer(buffer, 0, dest->bmpheader.planes);
+    fwrite(buffer, 1, 2, fp);
+    
+    insert_ushort_into_buffer(buffer, 0, dest->bmpheader.bitsperpixel);
+    fwrite(buffer, 1, 2, fp);
+    
+    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.compression);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.sizeofbitmap);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.horzres);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.vertres);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.colorsused);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.colorsimp);
+    fwrite(buffer, 1, 4, fp);
+
+    /* Escreve uma tabela color vazia. */
+    buffer[0] = 0x00;
+
+    for(i = 0;i < src->bmpheader.sizeofbitmap;i++){
+        fwrite(buffer,1,1,fp);
+    }
+
+
+
+    return 0;
+
+}
+
+int create_image_file(char *in_name,char *out_name){
+
+    bmpfileheader bmp_file_header;
+    bitmapheader bmheader;
+
+    if(is_a_bmp(in_name)){
+        read_bmp_file_header(in_name,&bmp_file_header);
+        read_bmp_header(in_name,&bmheader);
+        create_allocate_bmp_file(out_name,&bmp_file_header,&bmheader);
+        return 1;
+    }
+
+    return 0;
+
+}
+
+int get_image_size(char *file_name,long *cols,long *rows){
+
+    int is_bmp = 0;
+    bitmapheader bmph;
+
+    if(is_a_bmp(file_name)){
+        read_bmp_header(file_name,&bmph);
+        *rows = bmph.height;
+        *cols = bmph.width;
+        return 1;
+    }
+
+    return 0;
+
+}
+
+/* allocate_image_array(...)
+ * Essa função aloca memoria de vetores de duas dimensões  */
+long **allocate_image_array(long length,long width){
+
+    int i;
+    long **the_array;
+
+    the_array = malloc(length*sizeof(long *));
+
+    for(i = 0;i < length;i++){
+        the_array[i] = malloc(width*sizeof(long ));
+        if(the_array[i] == '\0'){
+            printf("\n\tmalloc of the_image[%d] failed",i);
+        }
+    }
+
+    return the_array;
+
+}
+
+/* free_image_array(...)
+ * Essa função libera a memoria alocada */
+int free_image_array(short **the_array, long length){
+    int i;
+    for(i = 0;i < length;i++){
+        free(the_array[i]);
+    }
+    return 1;
+}
+
+int write_bmp_image(char *file_name,ctstruct **array){
+
+    char *buffer, c;
+    FILE *image_file;
+
+    int pad = 0, position;
+    int bytes, i, j;
+    long height = 0, width = 0;
+    bmpfileheader *file_header;
+    bitmapheader *bmheader;
+    union short_char_union scu;
+
+    read_bmp_file_header(file_name,&file_header);
+    read_bmp_header(file_name,&bmheader);
+
+    height = bmheader->height;
+    width = bmheader->width;
+
+    if(height < 0) height = height*(-1);
+
+    buffer = (char *) malloc(width * sizeof(char));
+    
+    for(i = 0;i < width;i++){
+        buffer[i] = '\0';
+    }
+
+    image_file = fopen(file_name,"rb+");
+    position = fseek(image_file,54,SEEK_SET);
+
+    position = fseek(image_file,file_header->offset,SEEK_SET);
+    pad = calculate_pad(width);
+
+    return 0;
 
 }
