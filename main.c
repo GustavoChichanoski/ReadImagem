@@ -51,6 +51,12 @@ int main(){
     int pad = calculate_pad(bmp_header.width);
     printf("pad: %i\n",pad);
 
+    bmp src, dest;
+    src.bmpheader = bmp_header;
+    src.file_header = file_header;
+
+    copy_bmp("lena.bmp","nael.bmp",&bmp_header,&file_header);
+
     return 0;
 
 }

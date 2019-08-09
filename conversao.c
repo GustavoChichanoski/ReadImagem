@@ -102,10 +102,10 @@ void insert_long_into_buffer(buffer,start,number)
 {
     union long_char_union lsu;
     lsu.l_num = number;
-    buffer[start+3] = lsu.l_alpha[0];
-    buffer[start+2] = lsu.l_alpha[1];
-    buffer[start+1] = lsu.l_alpha[2];
-    buffer[start+0] = lsu.l_alpha[3];
+    buffer[start+0] = lsu.l_alpha[0];
+    buffer[start+1] = lsu.l_alpha[1];
+    buffer[start+2] = lsu.l_alpha[2];
+    buffer[start+3] = lsu.l_alpha[3];
 } /* Ends insert_short_into_buffer */
 
 /* insert_ulong_into_buffer(...)

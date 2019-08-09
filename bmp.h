@@ -178,7 +178,8 @@ int get_bitperpixel(char *file_name,long *bitsperpixel);
 int does_not_exist(char file_name[]);
 int get_lsb(char *name);
 int equate_bitmapheaders(bitmapheader *src,bitmapheader *dest);
-int create_allocate_bmp_file(char *in_name,char *out_name,bmp *src,bmp *dest);
+int create_allocate_bmp_file(char *in_name,char *out_name,bitmapheader *bmpheader,bmpfileheader *file_header);
+int copy_bmp(char *in_name,char *out_name,bitmapheader *bmpheader,bmpfileheader *file_header);
 
 #ifdef __cplusplus
     }

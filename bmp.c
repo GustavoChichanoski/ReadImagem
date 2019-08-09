@@ -276,35 +276,13 @@ int equate_bmpfileheader(bmpfileheader *src,bmpfileheader *dest){
     return 1;
 }
 
-int copy_file(char *in_name,char *out_name){
-
-    FILE *in_image, *out_image;
-    bmpfileheader *in_file_header, *out_file_header;
-    bitmapheader *in_bmheader, *out_bmheader;
-
-    in_image = fopen(in_name,"rb");
-    in_image = fopen(out_name,"rb");
-
-    read_bmp_file_header(in_name,&in_file_header);
-    read_bmp_header(in_name,&in_bmheader);
-
-    equate_bmpfileheader(&in_file_header,&out_file_header);
-    equate_bitmapheaders(&in_bmheader,&out_bmheader);
-
-    return 0;
-
-}
-
-int create_allocate_bmp_file(char *in_name,char *out_name,bmp *src,bmp *dest){
+int create_allocate_bmp_file(char *in_name,char *out_name,bitmapheader *bmpheader,bmpfileheader *file_header){
 
     char buffer[100];
     int i, pad = 0;
     FILE *fp;
 
-    pad = calculate_pad(src->bmpheader.size);
-
-    dest->bmpheader = src->bmpheader;
-    dest->file_header = src->file_header;
+    pad = calculate_pad(bmpheader->size);
 
     if((fp = fopen(out_name,"wb")) == NULL){
         printf("\nERROR: could not create file %s",out_name);
@@ -312,79 +290,157 @@ int create_allocate_bmp_file(char *in_name,char *out_name,bmp *src,bmp *dest){
     }
 
     /* Escreve 14 bytes do cabeçalho bmp */
-    insert_ushort_into_buffer(buffer,0,dest->file_header.filetype);
+    insert_ushort_into_buffer(buffer,0,file_header->filetype);
     fwrite(buffer,1,2,fp);
 
-    insert_ulong_into_buffer(buffer,0,dest->file_header.filesize);
+    insert_ulong_into_buffer(buffer,0,file_header->filesize);
     fwrite(buffer, 1, 4, fp);
 
-    insert_short_into_buffer(buffer,0,dest->file_header.reserved1);
+    insert_short_into_buffer(buffer,0,file_header->reserved1);
     fwrite(buffer, 1, 2, fp);
 
-    insert_short_into_buffer(buffer,0,dest->file_header.reserved2);
+    insert_short_into_buffer(buffer,0,file_header->reserved2);
     fwrite(buffer, 1, 2, fp);
 
-    insert_ulong_into_buffer(buffer, 0,dest->file_header.offset);
+    insert_ulong_into_buffer(buffer, 0,file_header->offset);
     fwrite(buffer, 1, 4, fp);
 
     /* Escreve os 40 bytes do cabeçalho da imagem */
-    insert_ulong_into_buffer(buffer,0,dest->bmpheader.size);
+    insert_ulong_into_buffer(buffer,0,bmpheader->size);
     fwrite(buffer, 1, 4, fp);
     
-    insert_long_into_buffer(buffer,0,dest->bmpheader.width);
+    insert_long_into_buffer(buffer,0,bmpheader->width);
     fwrite(buffer, 1, 4, fp);
     
-    insert_long_into_buffer(buffer,0,dest->bmpheader.height);
+    insert_long_into_buffer(buffer,0,bmpheader->height);
     fwrite(buffer, 1, 4, fp);
     
-    insert_ushort_into_buffer(buffer, 0, dest->bmpheader.planes);
+    insert_ushort_into_buffer(buffer,0,bmpheader->planes);
     fwrite(buffer, 1, 2, fp);
     
-    insert_ushort_into_buffer(buffer, 0, dest->bmpheader.bitsperpixel);
+    insert_ushort_into_buffer(buffer,0,bmpheader->bitsperpixel);
     fwrite(buffer, 1, 2, fp);
     
-    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.compression);
+    insert_ulong_into_buffer(buffer,0,bmpheader->compression);
     fwrite(buffer, 1, 4, fp);
     
-    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.sizeofbitmap);
+    insert_ulong_into_buffer(buffer,0,bmpheader->sizeofbitmap);
     fwrite(buffer, 1, 4, fp);
     
-    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.horzres);
+    insert_ulong_into_buffer(buffer,0,bmpheader->horzres);
     fwrite(buffer, 1, 4, fp);
     
-    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.vertres);
+    insert_ulong_into_buffer(buffer,0,bmpheader->vertres);
     fwrite(buffer, 1, 4, fp);
     
-    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.colorsused);
+    insert_ulong_into_buffer(buffer,0,bmpheader->colorsused);
     fwrite(buffer, 1, 4, fp);
     
-    insert_ulong_into_buffer(buffer, 0, dest->bmpheader.colorsimp);
+    insert_ulong_into_buffer(buffer,0,bmpheader->colorsimp);
     fwrite(buffer, 1, 4, fp);
 
     /* Escreve uma tabela color vazia. */
     buffer[0] = 0x00;
 
-    for(i = 0;i < src->bmpheader.sizeofbitmap;i++){
-        fwrite(buffer,1,1,fp);
+    printf("Size of bitmap: %lu",bmpheader->sizeofbitmap);
+
+    for(i = 0;i < bmpheader->sizeofbitmap;i++){
+        fwrite(buffer,sizeof(char),1,fp);
     }
 
-
+    fclose(fp);
 
     return 0;
 
 }
 
-int create_image_file(char *in_name,char *out_name){
+int copy_bmp(char *in_name,char *out_name,bitmapheader *bmpheader,bmpfileheader *file_header){
 
-    bmpfileheader bmp_file_header;
-    bitmapheader bmheader;
+    char buffer[100];
+    int i, pad = 0;
+    FILE *in;
+    FILE *fp;
 
-    if(is_a_bmp(in_name)){
-        read_bmp_file_header(in_name,&bmp_file_header);
-        read_bmp_header(in_name,&bmheader);
-        create_allocate_bmp_file(out_name,&bmp_file_header,&bmheader);
-        return 1;
+    pad = calculate_pad(bmpheader->size);
+
+    if((fp = fopen(out_name,"wb")) == NULL){
+        printf("\nERROR: could not create file %s",out_name);
+        exit(2);
     }
+
+    /* Escreve 14 bytes do cabeçalho bmp */
+    insert_ushort_into_buffer(buffer,0,file_header->filetype);
+    fwrite(buffer,1,2,fp);
+
+    insert_ulong_into_buffer(buffer,0,file_header->filesize);
+    fwrite(buffer, 1, 4, fp);
+
+    insert_short_into_buffer(buffer,0,file_header->reserved1);
+    fwrite(buffer, 1, 2, fp);
+
+    insert_short_into_buffer(buffer,0,file_header->reserved2);
+    fwrite(buffer, 1, 2, fp);
+
+    insert_ulong_into_buffer(buffer, 0,file_header->offset);
+    fwrite(buffer, 1, 4, fp);
+
+    /* Escreve os 40 bytes do cabeçalho da imagem */
+    insert_ulong_into_buffer(buffer,0,bmpheader->size);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_long_into_buffer(buffer,0,bmpheader->width);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_long_into_buffer(buffer,0,bmpheader->height);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ushort_into_buffer(buffer,0,bmpheader->planes);
+    fwrite(buffer, 1, 2, fp);
+    
+    insert_ushort_into_buffer(buffer,0,bmpheader->bitsperpixel);
+    fwrite(buffer, 1, 2, fp);
+    
+    insert_ulong_into_buffer(buffer,0,bmpheader->compression);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer,0,bmpheader->sizeofbitmap);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer,0,bmpheader->horzres);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer,0,bmpheader->vertres);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer,0,bmpheader->colorsused);
+    fwrite(buffer, 1, 4, fp);
+    
+    insert_ulong_into_buffer(buffer,0,bmpheader->colorsimp);
+    fwrite(buffer, 1, 4, fp);
+
+    /* Escreve uma tabela color vazia. */
+    buffer[0] = 0x0F;
+    buffer[1] = 0xFF;
+
+    char aux[3];
+    char aux2[3];
+
+    printf("Size of bitmap: %02X",buffer[0]);
+
+    in = fopen(in_name,"rb");
+
+    for(i = 0;i < (bmpheader->sizeofbitmap/3)/2;i++){
+        fread(aux,sizeof(char),3,in);
+        fwrite(aux,sizeof(char),3,fp);
+    }
+
+    for(i = 0;i < (bmpheader->sizeofbitmap/3)/2;i++){
+        aux[0] = 0x00; aux[1] = 0x00; aux[2] = 0x00;
+        fwrite(aux,sizeof(char),3,fp);
+    }
+
+    fclose(in);
+    fclose(fp);
 
     return 0;
 
@@ -444,15 +500,15 @@ int write_bmp_image(char *file_name,ctstruct **array){
     int pad = 0, position;
     int bytes, i, j;
     long height = 0, width = 0;
-    bmpfileheader *file_header;
-    bitmapheader *bmheader;
+    bmpfileheader file_header;
+    bitmapheader bmheader;
     union short_char_union scu;
 
     read_bmp_file_header(file_name,&file_header);
     read_bmp_header(file_name,&bmheader);
 
-    height = bmheader->height;
-    width = bmheader->width;
+    height = bmheader.height;
+    width = bmheader.width;
 
     if(height < 0) height = height*(-1);
 
@@ -465,7 +521,7 @@ int write_bmp_image(char *file_name,ctstruct **array){
     image_file = fopen(file_name,"rb+");
     position = fseek(image_file,54,SEEK_SET);
 
-    position = fseek(image_file,file_header->offset,SEEK_SET);
+    position = fseek(image_file,file_header.offset,SEEK_SET);
     pad = calculate_pad(width);
 
     return 0;
