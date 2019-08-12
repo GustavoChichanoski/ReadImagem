@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "conversao.h"
 #include "bmp.h"
+#include "processamento.h"
 
 int main(){
 
@@ -13,17 +14,14 @@ int main(){
     unsigned long ull;
     long ll;
     short ss;
-    char *file_image = "lena.bmp";
+    char *file_image = "rosto.bmp";
     bmpfileheader file_header;
     bitmapheader bmp_header;
 
     if(!is_a_bmp(file_image)){
         printf("O arquivo %s não é um .bmp",file_image);
+        exit(EXIT_FAILURE);
     }
-
-    extract_ushort_from_buffer(buffer,1,0,number);
-    uss = *number;
-    printf("String: %c%c, short: %i\n",buffer[0],buffer[1],uss);
 
     if(read_bmp_file_header(file_image,&file_header) == 1){
         printf("Informações sobre o arquivo não lidos\n");
@@ -35,7 +33,6 @@ int main(){
     printf("Offset: %lu \n\n",file_header.offset);
 
     int x;
-    scanf("%d",&x);
 
     if(read_bmp_header(file_image,&bmp_header) == 1){
         printf("Informações sobre a imagem não lidos\n");
@@ -57,9 +54,13 @@ int main(){
     }
 
     pixel **rgb = allocate_image_array(bmp_header.height,bmp_header.width);
+    int pad = calculate_pad(bmp_header.width);
 
-    rgb = read_bmp_image("lena.bmp",rgb,&file_header,&bmp_header);
-    write_bmp("anel.bmp",&file_header,&bmp_header,rgb);
+    rgb = read_bmp_image(file_image,rgb,&file_header,&bmp_header);
+    printf("Imagem lida\n");
+    rgb = edge_gauss(bmp_header.width,bmp_header.height,rgb);
+    printf("Detector\n");
+    write_bmp("homo.bmp",&file_header,&bmp_header,rgb);
 
     return 0;
 
