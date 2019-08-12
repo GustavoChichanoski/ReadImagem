@@ -24,7 +24,11 @@ void extract_ushort_from_buffer(buffer,lsb,start,number)
 /* extract_short_from_buffer(...)
  * This takes a two byte short out of a buffer of characters.
  * It is important to know the byte order LSB or MSB. */
-void extract_short_from_buffer(char buffer[],int lsb,int start,short *number){
+void extract_short_from_buffer(buffer,lsb,start,number)
+    char buffer[];
+    int lsb, start;
+    short *number;
+{
     union short_char_union lcu;
     if(lsb == 1){
         lcu.s_alpha[0] = buffer[start+0];
@@ -79,7 +83,11 @@ void extract_ulong_from_buffer(buffer,lsb,start,number)
 }
 
 /* Insere 2 bytes no arquivo de imagem */
-void insert_short_into_buffer(char buffer[],int start,short number){
+void insert_short_into_buffer(buffer,start,number)
+    char buffer[];
+    int start;
+    short number;
+{
     union short_char_union lsu;
     lsu.s_num = number;
     buffer[start+0] = lsu.s_alpha[0];
@@ -87,7 +95,11 @@ void insert_short_into_buffer(char buffer[],int start,short number){
 } /* Ends insert_short_into_buffer */
 
 /* Insere dois bytes no arquivo de imagem */
-void insert_ushort_into_buffer(char buffer[],int start,unsigned short number){
+void insert_ushort_into_buffer(buffer,start,number)
+    char buffer[];
+    int start;
+    unsigned short number;
+{
     union ushort_char_union lsu;
     lsu.s_num = number;
     buffer[start+1] = lsu.s_alpha[1];

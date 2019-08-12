@@ -130,6 +130,12 @@ all: $(EXECUTAVEL)
 clean:
 	rm -rf *.o
 
+cleanobj:
+	del *.object
+
+cleanexe:
+	del *.exe
+
 rmproper: clean
 	rm -rf $(EXECUTAVEL)
 

@@ -34,28 +34,32 @@ int main(){
     printf("Tamanho do arquivo: %ld\n",file_header.filesize);
     printf("Offset: %lu \n\n",file_header.offset);
 
+    int x;
+    scanf("%d",&x);
+
     if(read_bmp_header(file_image,&bmp_header) == 1){
         printf("Informações sobre a imagem não lidos\n");
         return 1;
     }
 
-    printf("Tamanho do header da imagem: %lu \n",bmp_header.size);
-    printf("width: %ld\n",bmp_header.width);
-    printf("height: %ld\n",bmp_header.height);
-    printf("planes: %i\n",bmp_header.planes);
-    printf("size of bitmap: %lu\n",bmp_header.sizeofbitmap);
-    printf("Bit per pixel: %u\n",bmp_header.bitsperpixel);
-    printf("compression: %lu\n",bmp_header.compression);
-    printf("cor importante: %lu\n",bmp_header.colorsimp);
-    printf("cor usadas: %lu\n",bmp_header.colorsused);
-    int pad = calculate_pad(bmp_header.width);
-    printf("pad: %i\n",pad);
+    if(1 == 1){
+        printf("Tamanho do header da imagem: %lu \n",bmp_header.size);
+        printf("width: %ld\n",bmp_header.width);
+        printf("height: %ld\n",bmp_header.height);
+        printf("planes: %i\n",bmp_header.planes);
+        printf("size of bitmap: %lu\n",bmp_header.sizeofbitmap);
+        printf("Bit per pixel: %u\n",bmp_header.bitsperpixel);
+        printf("compression: %lu\n",bmp_header.compression);
+        printf("cor importante: %lu\n",bmp_header.colorsimp);
+        printf("cor usadas: %lu\n",bmp_header.colorsused);
+        int pad = calculate_pad(bmp_header.width);
+        printf("pad: %i\n",pad);
+    }
 
-    bmp src, dest;
-    src.bmpheader = bmp_header;
-    src.file_header = file_header;
+    pixel **rgb = allocate_image_array(bmp_header.height,bmp_header.width);
 
-    copy_bmp("lena.bmp","nael.bmp",&bmp_header,&file_header);
+    rgb = read_bmp_image("lena.bmp",rgb,&file_header,&bmp_header);
+    write_bmp("anel.bmp",&file_header,&bmp_header,rgb);
 
     return 0;
 

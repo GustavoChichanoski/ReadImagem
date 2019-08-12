@@ -160,18 +160,12 @@ typedef struct {
     unsigned long blue;
     unsigned long green;
     unsigned long red;
-} ctstruct; /* ctstruct */
-
-/* bmp */
-typedef struct {
-    bmpfileheader file_header;
-    bitmapheader bmpheader;
-} bmp;
+} pixel; /* pixel */
 
 
 int read_bmp_header(char *file_name,bitmapheader *bmp_header);
 int read_bmp_file_header(char *file_name,bmpfileheader *file_header);
-int read_bmp_image(char *file_name,ctstruct **array);
+pixel **read_bmp_image(char *file_name,pixel **array,bmpfileheader *file_header,bitmapheader *bmheader);
 int calculate_pad(long width);
 int is_a_bmp(char *file_name);
 int get_bitperpixel(char *file_name,long *bitsperpixel);
@@ -180,6 +174,9 @@ int get_lsb(char *name);
 int equate_bitmapheaders(bitmapheader *src,bitmapheader *dest);
 int create_allocate_bmp_file(char *in_name,char *out_name,bitmapheader *bmpheader,bmpfileheader *file_header);
 int copy_bmp(char *in_name,char *out_name,bitmapheader *bmpheader,bmpfileheader *file_header);
+pixel **allocate_image_array(long height,long width);
+int write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel **rgb);
+int free_image_array(pixel **the_array,long width,long height);
 
 #ifdef __cplusplus
     }
