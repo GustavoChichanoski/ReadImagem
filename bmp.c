@@ -18,7 +18,7 @@ pixel **read_color_table(file_name,bmheader,rgb)
 
     FILE *fp;
     int position;
-    char buffer[10];
+    char buffer[1];
     long height, width;
     int x, y, pad;
 
@@ -27,25 +27,61 @@ pixel **read_color_table(file_name,bmheader,rgb)
     height = bmheader->height;
     width = bmheader->width;
     pad = calculate_pad(width);
-    printf("Lendo a imagem\n");
+    printf("Lendo a imagem de [%ld][%ld]\n",height,width);
+    int bytes = 54;
 
-    for(y = height-1;y > -1;y--){
-        for(x = 0;x < width;x++){
-            fread(buffer,sizeof(char),3,fp);
-            rgb[y][x].blue  = buffer[0];
-            rgb[y][x].green = buffer[1];
-            rgb[y][x].red   = buffer[2];
+    rgb[20][223].blue = 0x00;
+
+    if(ordem_de_leitura(width) == 1){
+        for(y = height-1;y > -1;y--){
+            for(x = 0;x < width+2;x++){
+                if(x < width){
+
+                    printf("%d [%d][%d][1]\n",bytes,y,x);
+                    bytes = bytes + 1;
+                    fread(buffer,1,1,fp);
+                    rgb[y][x].blue  = buffer[0];
+
+                    printf("%d [%d][%d][2]\n",bytes,y,x);
+                    bytes = bytes + 1;
+                    fread(buffer,1,1,fp);
+                    rgb[y][x].green = buffer[1];
+
+                    printf("%d [%d][%d][3]\n",bytes,y,x);
+                    bytes = bytes + 1;
+                    fread(buffer,1,1,fp);
+                    rgb[y][x].red   = buffer[2];
+
+                } else {
+                    for(int a = 0;a < pad;a++){
+                        printf("%d\n",bytes);
+                        bytes = bytes + 1;
+                        fread(buffer,1,1,fp);
+                    }
+                }
+            }
         }
-        if(pad > 0){
-            buffer[0] = 0x00; buffer[1] = 0x00; 
-            buffer[2] = 0x00; buffer[3] = 0x00;
-            fread(buffer,sizeof(char),pad,fp);
+    } else {
+        for(y = 0;y < height;y++){
+            for(x = 0;x < width;x++){
+                fread(buffer,1,3,fp);
+                rgb[y][x].blue  = buffer[0];
+                rgb[y][x].green = buffer[1];
+                rgb[y][x].red   = buffer[2];
+            }
+            if(pad != 0){
+                position = fseek(fp,pad,SEEK_CUR);
+            }
         }
     }
 
     fclose(fp);
     return rgb;
 
+}
+
+int bytesperrow(long width,int bitCout){
+    return (width*bitCout + 31)/32;
 }
 
 int read_bmp_file_header(char *file_name,bmpfileheader *file_header){
@@ -112,6 +148,7 @@ int read_bmp_header(char *file_name,bitmapheader *bmp_header){
     fseek(fp,14,SEEK_SET);
 
     if(1 == 1){
+
         fread(buffer,1,4,fp);
         extract_ulong_from_buffer(buffer,1,0,&ull);
         bmp_header->size = ull;
@@ -280,6 +317,22 @@ int free_bmp(long width,long height,pixel **rgb){
     return 1;
 }
 
+int ordem_de_leitura(long height){
+    if(height > 0){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int pixel_storage(int bitsperpixel,long width){
+    long rowSize;
+    rowSize = (bitsperpixel*width)/32;
+    if((bitsperpixel*width)%32 != 0){
+        rowSize = ((bitsperpixel*width)/32)*4;
+    }
+}
+
 int write_bmp(file_name,file_header,bmp_header,rgb)
     char *file_name;
     bmpfileheader *file_header;
@@ -366,6 +419,8 @@ int write_bmp(file_name,file_header,bmp_header,rgb)
             fwrite(buffer,sizeof(char),3,fp);
         }
         if(pad > 0){
+            buffer[0] = 0x00; buffer[1] = 0x00;
+            buffer[2] = 0x00; buffer[3] = 0x00;
             fwrite(buffer,sizeof(char),pad,fp);
         }
     }

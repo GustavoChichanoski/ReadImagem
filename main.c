@@ -14,7 +14,7 @@ int main(){
     unsigned long ull;
     long ll;
     short ss;
-    char *file_image = "rosto.bmp";
+    char *file_image = "lena.bmp";
     bmpfileheader file_header;
     bitmapheader bmp_header;
 
@@ -53,7 +53,14 @@ int main(){
         printf("pad: %i\n",pad);
     }
 
-    pixel **rgb = allocate_image_array(bmp_header.height,bmp_header.width);
+    scanf("%d");
+
+    long height, width;
+    height = bmp_header.height;
+    width = bmp_header.width;
+    if(height < 0) height = height*(-1);
+
+    pixel **rgb = allocate_image_array(width,height);
     int pad = calculate_pad(bmp_header.width);
 
     rgb = read_bmp_image(file_image,rgb,&file_header,&bmp_header);
