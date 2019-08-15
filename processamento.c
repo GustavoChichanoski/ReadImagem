@@ -82,6 +82,35 @@ pixel img_gauss(pixel **matriz){
 
 }
 
+pixel img_median(pixel **matriz){
+    pixel reg;
+    for(int y = 0;y < 3;y++){
+        for(int x = 0;x < 3;x++){
+            reg.blue += matriz[y][x].blue;
+            reg.green += matriz[y][x].green;
+            reg.red += matriz[y][x].red;
+        }
+    }
+    reg.blue /= 3;
+    reg.green /= 3;
+    reg.red /= 3;
+    return reg;
+}
+
+pixel **sub_image(pixel **in,pixel **out,long cols,long rows){
+
+    int x, y;
+
+    for(y = 0;y < rows;y++){
+        for(x = 0;x < cols;x++){
+            out[y][x].blue  = in[y][x].blue - out[y][x].blue;
+            out[y][x].green = in[y][x].green - out[y][x].green;
+            out[y][x].red   = in[y][x].red - out[y][x].red;
+        }
+    }
+    return out;
+}
+
 pixel **edge_gauss(long width,long height,pixel **rgb){
 
     int x, y;
@@ -146,6 +175,105 @@ pixel **edge_gauss(long width,long height,pixel **rgb){
             }
             ref = rgb[y][x];
             rgb[y][x] = img_homo(m_pixel,ref);
+        }
+    }
+
+    return rgb;
+
+}
+
+
+pixel **median_filter(long width,long height,pixel **rgb){
+
+    int x, y;
+    pixel **RGB;
+    pixel **m_pixel;
+    pixel aux;
+
+    aux.blue = 0x00; aux.red = 0x00; aux.green = 0x00;
+    m_pixel = allocate_image_array(3,3);
+    RGB = allocate_image_array(height,width);
+    for(y = 0; y < height;y++){
+        for(x = 0;x < width;x++){
+            if(y == 0){
+                if(x == 0){ 
+                    m_pixel[0][0] = aux; m_pixel[0][1] = aux;         m_pixel[0][2] = aux;
+                    m_pixel[1][0] = aux; m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = rgb[y][x+1];
+                    m_pixel[2][0] = aux; m_pixel[2][2] = rgb[y][x+1]; m_pixel[2][2] = rgb[y+1][x+1];
+                } else {
+                    if(x == width-1){
+                        m_pixel[0][0] = aux;           m_pixel[0][1] = aux;         m_pixel[0][2] = aux;
+                        m_pixel[1][0] = rgb[y][x-1];   m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = aux;
+                        m_pixel[2][0] = rgb[y+1][x-1]; m_pixel[2][2] = rgb[y][x+1]; m_pixel[2][2] = aux;
+                    } else {
+                        m_pixel[0][0] = aux;           m_pixel[0][1] = aux;         m_pixel[0][2] = aux;
+                        m_pixel[1][0] = rgb[y][x-1];   m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = rgb[y][x+1];
+                        m_pixel[2][0] = rgb[y+1][x-1]; m_pixel[2][2] = rgb[y][x+1]; m_pixel[2][2] = rgb[y+1][x+1];
+                    }
+                }
+            } else {
+                if(y == (height -1)){
+                    if(x == 0){
+                        m_pixel[0][0] = aux; m_pixel[0][1] = rgb[y-1][x]; m_pixel[0][2] = rgb[y-1][x+1]; 
+                        m_pixel[1][0] = aux; m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = rgb[y][x+1];
+                        m_pixel[2][0] = aux; m_pixel[2][1] = aux;         m_pixel[2][2] = aux;
+                    } else {
+                        if(x == width-1){
+                            m_pixel[0][0] = rgb[y-1][x-1]; m_pixel[0][1] = rgb[y-1][x]; m_pixel[0][2] = aux;
+                            m_pixel[1][0] = rgb[y][x-1];   m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = aux;
+                            m_pixel[2][0] = aux;           m_pixel[2][1] = aux;         m_pixel[2][2] = aux;
+                        } else {
+                            m_pixel[0][0] = rgb[y-1][x-1]; m_pixel[0][1] = rgb[y-1][x]; m_pixel[0][2] = rgb[y-1][x+1]; 
+                            m_pixel[1][0] = rgb[y][x-1];   m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = rgb[y][x+1];
+                            m_pixel[2][0] = aux;           m_pixel[2][1] = aux;         m_pixel[2][2] = aux;
+                        }
+                    }
+                } else {
+                    if(x == 0){
+                        m_pixel[0][0] = aux; m_pixel[0][1] = rgb[y-1][x]; m_pixel[0][2] = rgb[y-1][x+1]; 
+                        m_pixel[1][0] = aux; m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = rgb[y][x+1];
+                        m_pixel[2][0] = aux; m_pixel[2][2] = rgb[y][x+1]; m_pixel[2][2] = rgb[y+1][x+1];
+                    } else {
+                        if(x == width - 1){
+                            m_pixel[0][0] = rgb[y-1][x-1]; m_pixel[0][1] = rgb[y-1][x]; m_pixel[0][2] = aux; 
+                            m_pixel[1][0] = rgb[y][x-1];   m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = aux;
+                            m_pixel[2][0] = rgb[y+1][x-1]; m_pixel[2][2] = rgb[y][x+1]; m_pixel[2][2] = aux;
+                        } else {
+                            m_pixel[0][0] = rgb[y-1][x-1]; m_pixel[0][1] = rgb[y-1][x]; m_pixel[0][2] = rgb[y-1][x+1]; 
+                            m_pixel[1][0] = rgb[y][x-1];   m_pixel[1][1] = rgb[y][x];   m_pixel[1][2] = rgb[y][x+1];
+                            m_pixel[2][0] = rgb[y+1][x-1]; m_pixel[2][2] = rgb[y][x+1]; m_pixel[2][2] = rgb[y+1][x+1];
+                        }
+                    }
+                }
+            }
+            RGB[y][x] = img_median(m_pixel);
+        }
+    }
+
+    return RGB;
+
+}
+
+pixel **gray_scale(long width,long height,pixel **rgb){
+
+    int y, x;
+    unsigned long r,g,b;
+
+    for(y = 0;y < height;y++){
+        for(x = 0;x < width;x++){
+            r = rgb[y][x].red; g = rgb[y][x].green; b = rgb[y][x].blue; 
+            if((r >= b) && (r >= g)){
+                rgb[y][x].blue = r;
+                rgb[y][x].green = r;
+            } else {
+                if((g >= r) && (g >= b)){
+                    rgb[y][x].blue = g;
+                    rgb[y][x].red = g;
+                } else {
+                    rgb[y][x].green = b;
+                    rgb[y][x].red = b;
+                }
+            }
         }
     }
 

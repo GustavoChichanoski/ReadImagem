@@ -6,6 +6,15 @@
 
 #define GRAY_LEVELS 256
 
+int ordem_de_leitura(long height){
+    if(height > 0){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+
 /* pixel **read_color_table(file_name,bmheader,rgb)
  * char *file_name
  * bitmapheader *bmheader
@@ -18,7 +27,7 @@ pixel **read_color_table(file_name,bmheader,rgb)
 
     FILE *fp;
     int position;
-    char buffer[1];
+    char buffer[10];
     long height, width;
     int x, y, pad;
 
@@ -27,39 +36,17 @@ pixel **read_color_table(file_name,bmheader,rgb)
     height = bmheader->height;
     width = bmheader->width;
     pad = calculate_pad(width);
-    printf("Lendo a imagem de [%ld][%ld]\n",height,width);
     int bytes = 54;
-
-    rgb[20][223].blue = 0x00;
 
     if(ordem_de_leitura(width) == 1){
         for(y = height-1;y > -1;y--){
-            for(x = 0;x < width+2;x++){
-                if(x < width){
-
-                    printf("%d [%d][%d][1]\n",bytes,y,x);
-                    bytes = bytes + 1;
-                    fread(buffer,1,1,fp);
-                    rgb[y][x].blue  = buffer[0];
-
-                    printf("%d [%d][%d][2]\n",bytes,y,x);
-                    bytes = bytes + 1;
-                    fread(buffer,1,1,fp);
-                    rgb[y][x].green = buffer[1];
-
-                    printf("%d [%d][%d][3]\n",bytes,y,x);
-                    bytes = bytes + 1;
-                    fread(buffer,1,1,fp);
-                    rgb[y][x].red   = buffer[2];
-
-                } else {
-                    for(int a = 0;a < pad;a++){
-                        printf("%d\n",bytes);
-                        bytes = bytes + 1;
-                        fread(buffer,1,1,fp);
-                    }
-                }
+            for(x = 0;x < width;x++){
+                fread(buffer,sizeof(char),3,fp);
+                rgb[y][x].blue  = buffer[0];
+                rgb[y][x].green = buffer[1];
+                rgb[y][x].red   = buffer[2];
             }
+            fread(buffer,sizeof(char),pad,fp);
         }
     } else {
         for(y = 0;y < height;y++){
@@ -78,10 +65,6 @@ pixel **read_color_table(file_name,bmheader,rgb)
     fclose(fp);
     return rgb;
 
-}
-
-int bytesperrow(long width,int bitCout){
-    return (width*bitCout + 31)/32;
 }
 
 int read_bmp_file_header(char *file_name,bmpfileheader *file_header){
@@ -317,22 +300,6 @@ int free_bmp(long width,long height,pixel **rgb){
     return 1;
 }
 
-int ordem_de_leitura(long height){
-    if(height > 0){
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-int pixel_storage(int bitsperpixel,long width){
-    long rowSize;
-    rowSize = (bitsperpixel*width)/32;
-    if((bitsperpixel*width)%32 != 0){
-        rowSize = ((bitsperpixel*width)/32)*4;
-    }
-}
-
 int write_bmp(file_name,file_header,bmp_header,rgb)
     char *file_name;
     bmpfileheader *file_header;
@@ -346,18 +313,19 @@ int write_bmp(file_name,file_header,bmp_header,rgb)
     unsigned short uss;
     unsigned long ull;
     FILE *fp;
-    int x, y;
+    int x, y, pad;
     long width = bmp_header->width;
     long height = bmp_header->height;
-    int pad;
 
     fp = fopen(file_name,"wb");
 
+    printf("Cabecalho arquivo\n");
     if(fp == NULL){
         printf("Arquivo: %s não encontrado\n",file_name);
         return 1;
     }
 
+    printf("Cabecalho imagem\n");
     if(1 == 1){
 
         insert_ushort_into_buffer(buffer,0,file_header->filetype);
@@ -413,14 +381,15 @@ int write_bmp(file_name,file_header,bmp_header,rgb)
 
     for(y = height-1;y > -1;y--){
         for(x = 0;x < width;x++){
-            buffer[0] = rgb[y][x].blue;
-            buffer[1] = rgb[y][x].green;
-            buffer[2] = rgb[y][x].red;
-            fwrite(buffer,sizeof(char),3,fp);
+            insert_long_into_buffer(buffer,0,rgb[y][x].blue);
+            fwrite(buffer,sizeof(char),1,fp);
+            insert_long_into_buffer(buffer,0,rgb[y][x].green);
+            fwrite(buffer,sizeof(char),1,fp);
+            insert_long_into_buffer(buffer,0,rgb[y][x].red);
+            fwrite(buffer,sizeof(char),1,fp);
         }
         if(pad > 0){
-            buffer[0] = 0x00; buffer[1] = 0x00;
-            buffer[2] = 0x00; buffer[3] = 0x00;
+            buffer[0] = 0x00; buffer[1] = 0x00; buffer[2] = 0x00;
             fwrite(buffer,sizeof(char),pad,fp);
         }
     }
