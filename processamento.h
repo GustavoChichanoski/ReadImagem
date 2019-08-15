@@ -20,6 +20,9 @@
 
     pixel **edge_detector(long width,long height,pixel **rgb);
     pixel **edge_gauss(long width,long height,pixel **rgb);
+    pixel **median_filter(long width,long height,pixel **rgb);
+    pixel **gray_scale(long width,long height,pixel **rgb);
+    pixel **sub_image(pixel **in,pixel **out,long cols,long rows);
     
 #ifdef __cplusplus
     }

@@ -2,13 +2,13 @@
 #define CONVERSAO_H_INCLUDED
 
 #ifdef CONVERSAO_EXPORTS
-#define CONVERSAO_API __declspec(dllexport)
+    #define CONVERSAO_API __declspec(dllexport)
 #else
-#define CONVERSAO_API __declspec(dllimport)
+    #define CONVERSAO_API __declspec(dllimport)
 #endif
 
 #ifdef __cplusplus
- extern "C" {
+    extern "C" {
 #endif
 
 /* Armazena duas variaveis no mesmo espa�o da memoria */
@@ -47,7 +47,7 @@ union ulong_char_union{
     char  l_alpha[4];
 };
 
-/* Fun��es que executam as convers�es */
+/* Funções que executam as conversões */
 void extract_ushort_from_buffer(char buffer[],int lsb,int start,unsigned short *number);
 void extract_short_from_buffer(char buffer[],int lsb,int start,short *number);
 void extract_long_from_buffer(char buffer[],int lsb,int start,long *number);
@@ -60,7 +60,7 @@ void insert_short_into_buffer(char buffer[],int start,short number);
 void insert_ushort_into_buffer(char buffer[],int start,unsigned short number);
 
 #ifdef __cplusplus
-}
+    }
 #endif
 
 #endif // CONVERSAO_H_INCLUDED
