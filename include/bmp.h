@@ -24,7 +24,7 @@
  *   The next two statements help port the
  *   system to non-Microsoft C compilers.
  *
- *   If you use Microsoft C, then you should 
+ *   If you use Microsoft C, then you should
  *   #define MSC 1     and
  *   #undef  OTHERC
  *
@@ -97,15 +97,15 @@ typedef struct{
  * bmp */
 
 /* bitmapheader
- * Contem as informações relacionada a imagem 
+ * Contem as informações relacionada a imagem
  * unsigned long size[4]         - tamanho da imagem
  * long width[4]                 - comprimento da imagem
  * long heigth[4]                - comprimento da imagem
  * unsigned short planes[2]      - não sei
  * unsigned short bitperpixel[2] - bit por pixel
  * unsigned long compression[4]  - compressão da imagem em arquivo
- * unsigned long horzres[4]      - 
- * unsigned long vertres[4]      - 
+ * unsigned long horzres[4]      -
+ * unsigned long vertres[4]      -
  * unsigned long colorused[4]    - cores usadas
  * unsigned long colorimp[4]     - cores importantes*/
 typedef struct {
@@ -140,19 +140,19 @@ typedef struct {
     /* 2 Bytes - Campo reservado 2 para uso futuro deve ser ZERO */
     short           reserved2;
 
-    /* 4 Bytes - Especifica o deslocamento, em bytes, 
-     * para o início da área de dados da imagem, a partir 
+    /* 4 Bytes - Especifica o deslocamento, em bytes,
+     * para o início da área de dados da imagem, a partir
      * do início deste cabeçalho.
-            - Se a imagem usa paleta, este campo tem 
+            - Se a imagem usa paleta, este campo tem
             tamanho = 14+40+(4 x NumeroDeCores)
-            - Se a imagem for true color, este campo tem 
-            tamanho = 14+40=54 
+            - Se a imagem for true color, este campo tem
+            tamanho = 14+40=54
     */
     unsigned long   offset;
 } bmpfileheader; /* bmpfileheader */
 
 /* RGB
- * Armazena as cores da imagem 
+ * Armazena as cores da imagem
  * unsigned long red[4]
  * unsigned long blue[4]
  * unsigned long green[4] */
