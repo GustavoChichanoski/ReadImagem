@@ -71,7 +71,6 @@
 #
 # NOCDDL
 
-
 # Environment 
 MKDIR     = mkdir
 CP        = cp
@@ -101,22 +100,22 @@ CFLAGS = -W -Wall -ansi -pedantic
 LDFLAGS = -lm
 
 # build
-build: .build-post
+#	build: .build-post
 
-.build-pre:
+#.build-pre:
 # Add your pre 'build' code here...
 
 
-.build-post: .build-impl
+#.build-post: .build-impl
 # Add your post 'build' code here...
 
 # clobber
-clobber: .clobber-post
+# clobber: .clobber-post
 
-.clobber-pre:
+#.clobber-pre:
 # Add your pre 'clobber' code here...
 
-.clobber-post: .clobber-impl
+#.clobber-post: .clobber-impl
 # Add your post 'clobber' code here...
 
 # all
@@ -151,9 +150,8 @@ help: .help-post
 .help-post: .help-impl
 # Add your post 'help' code here...
 
-
 # include project implementation makefile
-include nbproject/Makefile-impl.mk
+#include nbproject/Makefile-impl.mk
 
 # include project make variables
-include nbproject/Makefile-variables.mk
+#include nbproject/Makefile-variables.mk

@@ -1,5 +1,12 @@
 {
     "files.associations": {
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "processamento.h": "c",
+        "bmp.h": "c",
+        "conversao.h": "c",
+        "operacaoPixel": "c",
+        "histograma": "c",
+        "detectores.h": "c",
+        "operacaopixel.h": "c"
     }
 }
