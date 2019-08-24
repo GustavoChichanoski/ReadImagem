@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../include/conversao.h"
+#include "conversao.h"
 
 /* extract_ushort_from_buffer(...)
  * This takes a two byte unsiged

@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/conversao.h"
-#include "../include/bmp.h"
-#include "../include/operacaoPixel.h"
-#include "../include/detectores.h"
+#include "conversao.h"
+#include "bmp.h"
+#include "operacaoPixel.h"
+#include "detectores.h"
 
 int mask1[3][3] = {
     { 0, 0, 0},{-1, 2,-1},{0,0,0}

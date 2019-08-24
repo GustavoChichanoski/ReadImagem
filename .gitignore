@@ -1,3 +1,5 @@
+### https://raw.github.com/github/gitignore/56e3f5a7b2a67413a1d3e33fceb8100898015a2e/C.gitignore
+
 # Prerequisites
 *.d
 
@@ -50,3 +52,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+*.bmp
+*.jpg

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-#include "../include/conversao.h"
-#include "../include/bmp.h"
+#include "conversao.h"
+#include "bmp.h"
 
 #define GRAY_LEVELS 256
 
