@@ -5,15 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-/* #include <graph.h> */
-#include <io.h>
-#include <fcntl.h>
-#include <direct.h>
-#include <math.h>
-#include <malloc.h>
-#include <string.h>
-#include <sys\types.h>
-#include <sys\stat.h>
 
 #ifndef BMP_H
 #define	BMP_H

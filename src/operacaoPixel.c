@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-#include "../include/conversao.h"
-#include "../include/bmp.h"
-#include "../include/detectores.h"
+#include "conversao.h"
+#include "bmp.h"
+#include "detectores.h"
 
 long somaCorPixel(pixel pixelEntrada);
 pixel maiorCordoPixel(pixel pixelEntrada);

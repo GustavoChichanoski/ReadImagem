@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/bmp.h"
+#include "bmp.h"
 
 int mask1[3][3] = {{1,1,1},{1,1,0},{1,0,0}};
 
