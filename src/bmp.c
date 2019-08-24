@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-#include "conversao.h"
-#include "bmp.h"
+#include "../include/conversao.h"
+#include "../include/bmp.h"
 
 #define GRAY_LEVELS 256
 
-int ordem_de_leitura(long height){
+/* Define a ordem de leitura da imagme */
+int ordem_de_leitura(height)
+    long height;
+{
     if(height > 0){
         return 1;
     } else {
@@ -14,11 +17,13 @@ int ordem_de_leitura(long height){
     }
 }
 
-
-/* pixel **read_color_table(file_name,bmheader,rgb)
- * char *file_name
- * bitmapheader *bmheader
- * linha *rgb */
+/* pixel **read_color_table(file_name,bmheader,rgb) *
+ * Entrada :                                        *
+ * char *file_name - Nome do arquivo da imagem      *
+ * bitmapheader *bmheader - Cabecalho da imagem     *
+ * pixel **rgb - mapa de pixel da imagem            *
+ * Saida :                                          *
+ * pixel **imagem - mapa de saida                   */
 pixel **read_color_table(file_name,bmheader,rgb)
     char *file_name;
     bitmapheader *bmheader;
@@ -67,7 +72,14 @@ pixel **read_color_table(file_name,bmheader,rgb)
 
 }
 
-int read_bmp_file_header(char *file_name,bmpfileheader *file_header){
+/* Funcao que retorna o cabecalho do arquivo             *
+ * Entradas :                                            *
+ * char *file_name - nome do arquivo que contem a imagem *
+ * bmpfileheader - cabecalho do arquivo                  */
+int read_bmp_file_header(file_name,file_header)
+    char *file_name;
+    bmpfileheader *file_header;
+{
 
     char buffer[10];
     long ll;
@@ -114,7 +126,14 @@ int read_bmp_file_header(char *file_name,bmpfileheader *file_header){
 
 }
 
-int read_bmp_header(char *file_name,bitmapheader *bmp_header){
+/* Funcao que retorna o cabecalho da imagem       *
+ * Entrada :                                      *
+ * char *file_name - nome do arquivo da imagem    *
+ * bitmapheader *bmp_header - cabecalho da imagem */
+int read_bmp_header(file_name,bmp_header)
+    char *file_name;
+    bitmapheader *bmp_header;
+{
 
     char buffer[10];
     long ll;
@@ -183,11 +202,14 @@ int read_bmp_header(char *file_name,bitmapheader *bmp_header){
 
 }
 
-/* read_bmp_image(file_name,array,file_header,bmheader)
- *  char *file_name;
- *  linha *array;
- *  bmpfileheader *file_header;
- *  bitmapheader *bmheader; */
+/* read_bmp_image(file_name,array,file_header,bmheader) *
+ * Entrada :                                            *
+ *  char *file_name - nome do arquivo da imagem         *
+ *  pixel *array - matriz de pixel                      *
+ *  bmpfileheader *file_header - cabecalho da arquivo   *
+ *  bitmapheader *bmheader - cabecalho da imagem        *
+ * Saida :                                              *
+ *  pixel **imagem - matriz de pixel da imagem          */
 pixel **read_bmp_image(file_name,array,file_header,bmheader)
     char *file_name;
     pixel **array;
@@ -219,25 +241,25 @@ pixel **read_bmp_image(file_name,array,file_header,bmheader)
 
 }
 
-/* calculte_pad(...)
- * Verifica se a largura da imagem é um numero divisivel por
- * 4, se for não adiciona pads. Caso seja diferente, indica
- * o números de bytes adicionados para completar essa regra */
-int calculate_pad(long width){
-
+/* calculte_pad(...)                                         *
+ * Verifica se a largura da imagem é um numero divisivel por *
+ * 4, se for não adiciona pads. Caso seja diferente, indica  *
+ * o números de bytes adicionados para completar essa regra  */
+int calculate_pad(width)
+    long width;
+{
     int pad = 0;
-
     pad = ((width%4) == 0) ? 0 : (4 - (width%4));
-
     return pad;
-
 }
 
-/* is_a_bmp(...)
- * This function looks at a file to see if it is a bmp file.
- * First look at the file extension. Next look at the filetype 
- * to ensure it is 0x4d42 */
-int is_a_bmp(char *file_name){
+/* is_a_bmp(...)                                                *
+ * This function looks at a file to see if it is a bmp file.    *
+ * First look at the file extension. Next look at the filetype  *
+ * to ensure it is 0x4d42                                       */
+int is_a_bmp(file_name)
+    char *file_name;
+{
 
     char *cc;
     bmpfileheader file_header;
@@ -273,33 +295,27 @@ int does_not_exist(char file_name[]){
 
 }
 
-pixel **allocate_image_array(long width,long height){
-    pixel **rgb;
-    int pad = calculate_pad(width);
-    rgb = malloc(height*sizeof(pixel*));
-    if(rgb == NULL){
-        printf("Socorro o malloc devolveu NULL! \n");
-        exit(EXIT_FAILURE);
-    }
-    for(int i = 0;i < height;++i){
-        rgb[i] = malloc((width+pad)*sizeof(pixel));
-        if(rgb[i] == NULL){
-            printf("Socorro o malloc devolveu NULL\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-    return rgb;
-}
-
-int free_bmp(long width,long height,pixel **rgb){
+/* Funcao que libera a memoria utilizada no armazenamento *
+ * dos pixel da imagem                                    *
+ * Entradas :                                             *
+ * long maxLinhas - Tamanho maximo vertical da imagem     *
+ * pixel imagem - Imagem a ser liberada                   */
+int free_bmp(long maxLinha,pixel **imagem)
+{
     int x, y;
-    for(y = 0;y < height;y++){
-        free(rgb[y]);
+    for(y = 0;y < maxLinha;y++){
+        free(imagem[y]);
     }
     printf("Memoria liberada\n");
     return 1;
 }
 
+/* Escreve um arquivo da imagem                     *
+ * Entradas :                                       *
+ * char *file_name - nome do arquivo                *
+ * bmpfilheader *file_header - cabecalho do arquivo *
+ * bitmapheader *bmp_header - cabeacalho da imagem  *
+ * pixel **rgb - matriz de pixel de imagem          */
 int write_bmp(file_name,file_header,bmp_header,rgb)
     char *file_name;
     bmpfileheader *file_header;
@@ -319,15 +335,12 @@ int write_bmp(file_name,file_header,bmp_header,rgb)
 
     fp = fopen(file_name,"wb");
 
-    printf("Cabecalho arquivo\n");
     if(fp == NULL){
         printf("Arquivo: %s não encontrado\n",file_name);
         return 1;
     }
-
-    printf("Cabecalho imagem\n");
-    if(1 == 1){
-
+    
+    {
         insert_ushort_into_buffer(buffer,0,file_header->filetype);
         fwrite(buffer,1,2,fp);
 

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "conversao.h"
+#include "../include/conversao.h"
 
 /* extract_ushort_from_buffer(...)
  * This takes a two byte unsiged
@@ -120,9 +120,9 @@ void insert_long_into_buffer(buffer,start,number)
     buffer[start+3] = lsu.l_alpha[3];
 } /* Ends insert_short_into_buffer */
 
-/* insert_ulong_into_buffer(...)
- * This inserts a four byte unsigned long into a buffer of characters.
- * It does this is LSB order. */
+/* insert_ulong_into_buffer(...)                                        *
+ * This inserts a four byte unsigned long into a buffer of characters.  *
+ * It does this is LSB order.                                           */
 void insert_ulong_into_buffer(buffer,start,number)
     char buffer[];
     int start;
