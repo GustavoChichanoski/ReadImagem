@@ -1,58 +1,56 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "conversao.h"
-#include "bmp.h"
-#include "operacaoPixel.h"
-#include "detectores.h"
+#include "../include/conversao.h"
+#include "../include/bmp.h"
+#include "../include/operacaoPixel.h"
+#include "../include/detectores.h"
 
-int mask1[3][3] = {
-    { 0, 0, 0},{-1, 2,-1},{0,0,0}
-};
+int mask1[9] = { 0, 0, 0,-1, 2,-1, 0, 0, 0};
 
-int mask2[3][3] = {
-    { 0,-1, 0},{ 0, 2, 0},{ 0,-1, 0}
-};
+int mask2[9] = { 0,-1, 0, 0, 2, 0, 0,-1, 0};
 
-pixel **m_matriz(pixel **rgb,int n,int maxX,int maxY,int x,int y);
-pixel   subAbsPixel(pixel a, pixel b);
-pixel   img_homo(pixel **matriz,pixel ref,int n);
-pixel   img_gauss(pixel **matriz,int n);
-pixel  *zero_histograma(pixel *histograma,int gray_levels);
+pixel *m_matriz(pixel *rgb,int n,int maxX,int maxY,int x,int y);
+pixel  subAbsPixel(pixel a, pixel b);
+pixel  img_homo(pixel *matriz,pixel ref,int n);
+pixel  img_gauss(pixel *matriz,int n);
+pixel *zero_histograma(pixel *histograma,int gray_levels);
 
-pixel img_median(matriz)
-    pixel **matriz;
+pixel img_median(matriz,ordem)
+    pixel *matriz;
+    int ordem;
 {
-
+    int posicao = 0;
     pixel reg;
     reg = igualarCorPixel(0);
 
-    for(int y = 0;y < 3;y++)
+    for(int y = 0;y < ordem;y++)
     {
-        for(int x = 0;x < 3;x++)
+        for(int x = 0;x < ordem;x++)
         {
-            reg.blue  += matriz[y][x].blue;
-            reg.green += matriz[y][x].green;
-            reg.red   += matriz[y][x].red;
+            reg.blue  += matriz[posicao].blue;
+            reg.green += matriz[posicao].green;
+            reg.red   += matriz[posicao].red;
+            posicao++;
         }
     }
-
-    reg.blue  /= 9;
-    reg.green /= 9;
-    reg.red   /= 9;
+    int ordem2 = ordem*ordem;
+    reg.blue  /= ordem2;
+    reg.green /= ordem2;
+    reg.red   /= ordem2;
 
     return reg;
 
 }
 
 pixel img_gauss(matriz,n)
-    pixel **matriz;
+    pixel *matriz;
     int n;
 {
 
     long max = 0, buffer;
     pixel aux;
     int maxX = 1, maxY = 1, n1 = n - 1, x = 0, y = 0;
-    int n2 = n/2;
+    int n2 = n/2,posicao = 0;
 
     for (y = 0;y < n; y++)
     {
@@ -60,7 +58,7 @@ pixel img_gauss(matriz,n)
         {
             if(x != n2 || y != n2)
             {
-                aux     = subAbsPixel(matriz[y][x],matriz[n1-y][n1-x]);
+                aux     = subAbsPixel(matriz[y*n+x],matriz[(n1-y)*n + n1-x]);
                 buffer  = somaCorPixel(aux);
                 if(buffer > max)
                 {
@@ -77,39 +75,39 @@ pixel img_gauss(matriz,n)
     ** matriz[0][2] - matriz[2][0] **
     ** matriz[1][0] - matriz[1][2] */
 
-    return matriz[maxX][maxY];
+    return matriz[maxY*3+maxX];
 
 }
 
-pixel **sub_image(in,out,cols,rows)
-    pixel **in, **out;
+pixel *sub_image(in,out,cols,rows)
+    pixel *in, *out;
     long cols, rows;
 {
 
     int x, y;
+    int posicao = 0;
 
     for(y = 0;y < rows;y++)
     {
         for(x = 0;x < cols;x++)
         {
-
-            out[y][x].blue  = in[y][x].blue  - out[y][x].blue;
-            out[y][x].green = in[y][x].green - out[y][x].green;
-            out[y][x].red   = in[y][x].red   - out[y][x].red;
-
+            out[posicao].blue  = in[posicao].blue  - out[posicao].blue;
+            out[posicao].green = in[posicao].green - out[posicao].green;
+            out[posicao].red   = in[posicao].red   - out[posicao].red;
+            posicao++;
         }
     }
 
     return out;
 }
 
-pixel **edge_gauss(maxLinha,maxColuna,imagem)
+pixel *edge_gauss(maxLinha,maxColuna,imagem)
     long maxColuna, maxLinha;
-    pixel **imagem;
+    pixel *imagem;
 {
 
-    int coluna, linha;
-    pixel ref, **aux, **m_pixel;
+    int coluna, linha, posicao = 0;
+    pixel ref, *aux, *m_pixel;
     
     m_pixel = allocate_image_array(3,3);
     aux = allocate_image_array(maxLinha,maxColuna);
@@ -118,9 +116,10 @@ pixel **edge_gauss(maxLinha,maxColuna,imagem)
     {
         for(coluna = 0;coluna < maxColuna;coluna++)
         {
-            ref     = imagem[linha][coluna];
+            ref     = imagem[posicao];
             m_pixel = m_matriz(imagem,3,maxColuna,maxLinha,linha,coluna);
-            aux[linha][coluna] = img_gauss(m_pixel,3);
+            aux[posicao] = img_gauss(m_pixel,3);
+            posicao++;
         }
     }
 
@@ -151,22 +150,22 @@ int zonaImagemValida(minLinhas,maxLinhas,minColunas,maxColunas,linha,coluna)
     return 0; /* A linha esta fora da zona valida */
 }
 
-/* Cria a matriz auxiliar                     *
- * Entradas         :                         *
- *  pixel **imagem  : mapa de pixel da imagem *
- *  n               : ordem da matriz         *
- *  maxColunas      : Valor máximo horizontal *
- *  maxLinhas       : Valor máximo vertical   *
- *  linha           : Valor horizontal atual  *
- *  coluna          : Valor vertical atual    *
- * Saida            :                         *
- *  pixel imagem    : pixel com maior valor   */
-pixel **m_matriz(imagem,ordemMatriz,maxColunas,maxLinhas,coluna,linha)
-    pixel **imagem;
-    int     ordemMatriz, maxColunas, maxLinhas,coluna,linha;
+/* Cria a matriz auxiliar                   *
+ * Entradas       :                         *
+ *  pixel *imagem : mapa de pixel da imagem *
+ *  ordemMatriz   : ordem da matriz         *
+ *  maxLinhas     : Valor máximo vertical   *
+ *  maxColunas    : Valor máximo horizontal *
+ *  linha         : Valor horizontal atual  *
+ *  coluna        : Valor vertical atual    *
+ * Saida          :                         *
+ *  pixel imagem  : pixel com maior valor   */
+pixel *m_matriz(imagem,ordemMatriz,maxLinhas,maxColunas,linha,coluna)
+    pixel *imagem;
+    int    ordemMatriz,maxLinhas,maxColunas,linha,coluna;
 {
     /* Cria um matriz com os valores ao redor */
-    pixel **matriz;
+    pixel *matriz;
     /* Cria um pixel com cores zero */
     pixel pixel0;
     /* Determina o valor do meio da matriz */
@@ -183,7 +182,7 @@ pixel **m_matriz(imagem,ordemMatriz,maxColunas,maxLinhas,coluna,linha)
     int colunaMatriz    = 0;
     /* Determina a linha da matriz */
     int linhaMatriz     = 0;
-
+    int posicao;
     /* Cria um pixel de valor 0 */
     pixel0 = igualarCorPixel(0);
     /* Aloca o espaço da "matriz" na memória */
@@ -195,8 +194,9 @@ pixel **m_matriz(imagem,ordemMatriz,maxColunas,maxLinhas,coluna,linha)
         /* Percorre as colunas da matriz "matriz" */
         for(colunaMatriz = 0;colunaMatriz < ordemMatriz;colunaMatriz++)
         {
+            posicao = linhaMatriz*ordemMatriz + colunaMatriz;
             /* Inicia a matriz 'matriz' com um pixel 0 */
-            matriz[linhaMatriz][colunaMatriz] = pixel0;
+            matriz[posicao] = pixel0;
             /* Contem o pixel atual da imagem */
             colunaImagem = colunaReferencia + colunaMatriz;
             /* Contem o pixel atual da imagem */
@@ -204,7 +204,7 @@ pixel **m_matriz(imagem,ordemMatriz,maxColunas,maxLinhas,coluna,linha)
 
             if(zonaImagemValida(0,maxLinhas,0,maxColunas,linhaImagem,colunaImagem) == 1)
             {
-                matriz[linhaMatriz][colunaMatriz] = imagem[linhaImagem][colunaImagem];
+                matriz[posicao] = imagem[linhaImagem*maxColunas + colunaImagem];
             }
 
         }
@@ -214,17 +214,17 @@ pixel **m_matriz(imagem,ordemMatriz,maxColunas,maxLinhas,coluna,linha)
 
 }
 
-pixel **median_filter(width,height,rgb)
+pixel *median_filter(width,height,imagem)
     long width,height;
-    pixel **rgb;
+    pixel *imagem;
 {
 
     int x, y;
-    pixel **RGB, **m_pixel, aux;
+    pixel *saida, *m_pixel, aux;
 
     aux     = igualarCorPixel(0);
     m_pixel = allocate_image_array(3,3);
-    RGB     = allocate_image_array(height,width);
+    saida   = allocate_image_array(height,width);
 
     /*  */
     for(y = 0; y < height; y++)
@@ -232,12 +232,12 @@ pixel **median_filter(width,height,rgb)
         /*  */
         for(x = 0; x < width; x++)
         {
-            m_pixel = m_matriz(rgb,3,width,height,x,y);
-            RGB[y][x] = img_median(m_pixel);
+            m_pixel = m_matriz(imagem,3,width,height,x,y);
+            saida[y*width + x] = img_median(m_pixel,3);
         }
     }
 
-    return RGB;
+    return saida;
 
 }
 
@@ -251,20 +251,21 @@ pixel **median_filter(width,height,rgb)
  * rgb      - Imagem a ser convertida                *
  * Saida    :                                        *
  * pixel**  - Imagem em preto e branco               */
-pixel **gray_scale(maxColunas,maxLinhas,imagem)
+pixel *gray_scale(maxColunas,maxLinhas,imagem)
     long maxColunas,maxLinhas;
-    pixel **imagem;
+    pixel *imagem;
 {
 
     /* Variavel que percorrem a matriz de pixel da imagem */
-    int linha, coluna;
+    int linha, coluna, posicao = 0;
     /* Loop para percorrer as linhas da matriz */
     for(linha = 0;linha < maxLinhas;linha++)
     {
         /* Loop para percorrer as colunas da matriz */
         for(coluna = 0;coluna < maxColunas;coluna++)
         {
-            imagem[linha][coluna] = maiorCordoPixel(imagem[linha][coluna]);
+            imagem[posicao] = maiorCordoPixel(imagem[posicao]);
+            posicao++;
         }
     }
     return imagem;
@@ -275,26 +276,29 @@ pixel **gray_scale(maxColunas,maxLinhas,imagem)
  * pixel **matriz : matriz de pixel     *
  * pixel   ref    : pixel de referência *
  * int     n      : ordem da matriz     */
-pixel img_homo(pixel **matriz,pixel ref,int n){
+pixel img_homo(pixel *matriz,pixel ref,int n){
 
     long max = 0, aux;
-    int x, y, maxX = n/2, maxY = n/2;
+    int x, y, n2 = n/2;
+    int posicao = 0, posicaoMax = (n2)*n+n2+1;
 
     for(y = 0;y < n;y++)
     {
         for(x = 0;x < n;x++)
         {
             /*  */
-            matriz[y][x] = subAbsPixel(matriz[y][x],ref);
-            aux = somaCorPixel(matriz[y][x]);
+            matriz[posicao] = subAbsPixel(matriz[posicao],ref);
+            aux = somaCorPixel(matriz[posicao]);
             /*  */
             if(aux > max)
             {
-                maxX = x; maxY = y; max = aux;
+                posicaoMax = posicao;
+                max = aux;
             }
+            posicao++;
         }
     }
-    return matriz[maxY][maxX];
+    return matriz[posicaoMax];
 }
 
 /* Realca as bordas da imagem                        *
@@ -304,23 +308,22 @@ pixel img_homo(pixel **matriz,pixel ref,int n){
  * rgb      - Imagem a ser convertida                *
  * Saida    :                                        *
  * pixel**  - Imagem com as bordas realçadas         */
-pixel **detectorBorda(maxColunas,maxLinhas,imagem)
-    long maxColunas, maxLinhas;
-    pixel **imagem;
+pixel *detectorBorda(maxColunas,maxLinhas,imagem)
+    int maxColunas, maxLinhas;
+    pixel *imagem;
 {
 
-    int linha, coluna, ordemMatriz = 3;
-    pixel referencia, **m_pixel;
+    int linha, coluna, ordemMatriz = 3,posicao = 0;
+    pixel referencia, *m_pixel;
 
     for(linha = 0;linha < maxLinhas;linha++)
     {
         for(coluna = 0;coluna < maxColunas;coluna++)
         {
-
-            referencia = imagem[linha][coluna];
-            m_pixel = m_matriz(imagem,ordemMatriz,maxColunas,maxLinhas,coluna,linha);
-            imagem[linha][coluna] = img_homo(m_pixel,referencia,ordemMatriz);
-
+            referencia = imagem[posicao];
+            m_pixel = m_matriz(imagem,ordemMatriz,maxLinhas,maxColunas,linha,coluna);
+            imagem[posicao] = img_homo(m_pixel,referencia,ordemMatriz);
+            posicao++;
         }
     }
 

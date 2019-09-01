@@ -1,48 +1,61 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-#include "conversao.h"
-#include "bmp.h"
-#include "detectores.h"
+#include "../include/bmp.h"
 
-long somaCorPixel(pixel pixelEntrada);
-pixel maiorCordoPixel(pixel pixelEntrada);
-pixel subAbsPixel(pixel a, pixel b);
-pixel somaPixel(pixel pixel1,pixel pixel2);
-pixel divPixelCnt(pixel pixel,int constante);
-pixel multPixelCnt(pixel pixel,int constante);
-pixel igualarCorPixel(int valor);
-pixel **allocate_image_array(long width,long height);
+pixel *allocate_image_array(long width,long height);
+pixel  multPixelCnt(pixel entrada,int constante);
+pixel  igualarCorPixel(int valor);
+pixel  divPixelCnt(pixel entrada,int constante);
+pixel  somaPixel(pixel a,pixel b);
+pixel  subAbsPixel(pixel a, pixel b);
+long   somaCorPixel(pixel entrada);
+pixel  maiorCordoPixel(pixel entrada);
+pixel  multiPixel(pixel a,pixel b);
+pixel  multiMatrizPixel(pixel imagem,pixel filtro,int ordemMatriz);
+void   organizarPixel(pixel *imagem,int inicio,int fim,pixel *aux);
 
 /* Aloca o espaco da matriz da imagem na memoria  */
-pixel **allocate_image_array(long width,long height){
-    pixel **rgb;
-    int pad = calculate_pad(width);
-    rgb = malloc(height*sizeof(pixel*));
-    if(rgb == NULL){
+pixel *allocate_image_array(long width,long height)
+{
+
+    pixel *imagem;
+
+    imagem = (pixel *) malloc(height*width*sizeof(pixel));
+
+    if(imagem == NULL){
         printf("Socorro o malloc devolveu NULL! \n");
         exit(EXIT_FAILURE);
     }
-    for(int i = 0;i < height;++i){
-        rgb[i] = malloc((width+pad)*sizeof(pixel));
-        if(rgb[i] == NULL){
-            printf("Socorro o malloc devolveu NULL\n");
-            exit(EXIT_FAILURE);
-        }
+
+    return imagem;
+
+}
+
+pixel *realocar_image_array(pixel *imagem,long width,long height)
+{
+
+    imagem = ( pixel *) malloc ( height * width * sizeof( pixel ) );
+
+    if(imagem == NULL){
+        printf("Socorro o malloc devolveu NULL! \n");
+        exit(EXIT_FAILURE);
     }
-    return rgb;
+
+    return imagem;
+
 }
 
 /* Multiplica o pixel por uma constante   *
  * Entradas :                             *
  * pixel pixel - Pixel a ser multiplicado *
  * int constante - constante multiplicada */
-pixel multPixelCnt(pixel pixel,int constante)
+pixel multPixelCnt(pixel entrada,int constante)
 {
-    pixel.blue  *= constante;
-    pixel.green *= constante;
-    pixel.red   *= constante;
-    return pixel;
+    entrada.blue  *= constante;
+    entrada.green *= constante;
+    entrada.red   *= constante;
+    return entrada;
 }
 
 /* Retorna um pixel com todas as cores com o mesmo valor passado   *
@@ -53,13 +66,13 @@ pixel multPixelCnt(pixel pixel,int constante)
 pixel igualarCorPixel(int valor)
 {
 
-    pixel pixelRetorno;
+    pixel retorno;
 
-    pixelRetorno.blue  = valor; /* A cor azul assume o valor passado */
-    pixelRetorno.green = valor; /* A cor verde assume o valor passado */
-    pixelRetorno.red   = valor; /* A cor vermelha assume o valor passado */
+    retorno.blue  = valor; /* A cor azul assume o valor passado */
+    retorno.green = valor; /* A cor verde assume o valor passado */
+    retorno.red   = valor; /* A cor vermelha assume o valor passado */
 
-    return pixelRetorno;
+    return retorno;
 
 }
 
@@ -69,16 +82,16 @@ pixel igualarCorPixel(int valor)
  * pixel pixel - pixel no dividendo     *
  * Saida:                               *
  * pixel pixel - pixel dividido         */
-pixel divPixelporCnt(pixel pixel,int constante)
+pixel divPixelporCnt(pixel entrada,int constante)
 {
     /* Divide a cor azul por uma contante e armazena no pixel */
-    pixel.blue  /= constante;
+    entrada.blue  /= constante;
     /* Divide a cor verde por uma contante e armazena no pixel */
-    pixel.green /= constante;
+    entrada.green /= constante;
     /* Divide a cor vermelha por uma contante e armazena no pixel */
-    pixel.red   /= constante;
+    entrada.red   /= constante;
     /* Retorna o pixel que contem o resultado da divisao */
-    return pixel;
+    return entrada;
 }
 
 /* Soma as cores de dois pixeis                       *
@@ -87,46 +100,27 @@ pixel divPixelporCnt(pixel pixel,int constante)
  * pixel pixel2 - Segundo pixel a ser somado          *
  * Saidas:                                            *
  * pixel resultado - resultado da soma dos dois pixel */
-pixel somaPixel(pixel pixel1,pixel pixel2)
+pixel somaPixel(pixel a,pixel b)
 {
     /* Soma da cor azul e armazena no pixel1 */
-    pixel1.blue  += pixel2.blue;
+    a.blue  += b.blue;
     /* Soma da cor verde e armazena no pixel1 */
-    pixel1.green += pixel2.green;
+    a.green += b.green;
     /* Soma da cor vermelha e armazena no pixel1 */
-    pixel1.red   += pixel2.red;
+    a.red   += b.red;
     /* Retorna o pixel1 */
-    return pixel1;
+    return a;
 }
 
 /* Subtrai o valor de dois pixel e retorna o valor absoluto*/
 pixel subAbsPixel(pixel a, pixel b)
 {
 
-    pixel resultado;
+    a.blue  = (b.blue  > a.blue)  ? (b.blue  - a.blue)  : (a.blue  - b.blue);
+    a.green = (b.green > a.green) ? (b.green - a.green) : (a.green - b.green);
+    a.red   = (b.red   > a.red)   ? (b.red   - a.red)   : (a.red   - b.red);
 
-    if(b.blue > a.blue) {
-        resultado.blue = b.blue - a.blue;
-    }
-    else {
-        resultado.blue = a.blue - b.blue;
-    }
-
-    if(b.green > a.green) {
-        resultado.green = b.green - a.green;
-    }
-    else {
-        resultado.green = a.green - b.green;
-    }
-
-    if(b.red > a.red) {
-        resultado.red = b.red - a.red;
-    }
-    else {
-        resultado.red = a.red - b.red;
-    }
-
-    return resultado;
+    return a;
 
 }
 
@@ -134,25 +128,24 @@ pixel subAbsPixel(pixel a, pixel b)
  * Entradas:                                    *
  * pixel pixelEntrada : Pixel de entrada        *
  * Saida              : somaDosPixel            */
-long somaCorPixel(pixel pixelEntrada)
+long somaCorPixel(pixel entrada)
 {
-    long somaDosPixel = (pixelEntrada.blue + pixelEntrada.green + pixelEntrada.red); 
-    return somaDosPixel;
+    return (entrada.blue + entrada.green + entrada.red);
 }
 
 /* Retorna um pixel, contendo em cada cor, o maior entre as tres cores de um pixel de entrada */
-pixel maiorCordoPixel(pixel pixelEntrada)
+pixel maiorCordoPixel(pixel entrada)
 {
     /* Armazena o valor da cor Azul */
-    int blue = pixelEntrada.blue;
+    int blue = entrada.blue;
     /* Armazena o valor da cor Vermelha */
-    int red  = pixelEntrada.red;
+    int red  = entrada.red;
     /* Armazena o valor da cor Verde */
-    int green = pixelEntrada.green;
+    int green = entrada.green;
     /* Armazena o maior entre as três cores */
     int maiorValor;
     /* Retorna o valor do pixel de retorno */
-    pixel pixelRetorno;
+    pixel retorno;
 
     /* Verifica se a cor azul é maior */
     if((blue >= red) && (blue >= green))
@@ -177,10 +170,10 @@ pixel maiorCordoPixel(pixel pixelEntrada)
     }
 
     /* Configura a cor azul, verde e vermelho como sendo o maior valor achado */
-    pixelRetorno = igualarCorPixel(maiorValor);
+    retorno = igualarCorPixel(maiorValor);
 
     /* Retorna um pixel com todas as cores com o maior valor achado */
-    return pixelRetorno;
+    return retorno;
 
 }
 
@@ -212,4 +205,49 @@ pixel multiMatrizPixel(pixel imagem,pixel filtro,int ordemMatriz)
 
     return soma;
 
+}
+
+void merge(pixel *imagem,int ini,int meio,int fim,pixel *aux)
+{
+
+    int i = ini,j = meio + 1,k = 0;
+
+    while(i <= meio && j <= fim)
+    {
+        if(somaCorPixel(imagem[i]) <= somaCorPixel(imagem[j]))
+        {
+            aux[k++] = imagem[i++];
+        }
+        else
+        {    
+            aux[k++] = imagem[j++];
+        }
+    }
+
+    while(i <= meio)
+    {
+        aux[k++] = imagem[i++];
+    }
+
+    while(j <= fim)
+    {
+        aux[k++] = imagem[j++];
+    }
+
+    for(i = ini, k = 0;i <= fim;k++,i++)
+    {
+        imagem[i] = aux[k];
+    }
+
+}
+
+void organizarPixel(pixel *imagem,int inicio,int fim,pixel *aux)
+{
+    if(inicio < fim)
+    {
+        int meio = (inicio + fim)/2;
+        organizarPixel(imagem,inicio,meio,aux);
+        organizarPixel(imagem,meio+1,fim,aux);
+        merge(imagem,inicio,meio,fim,aux);
+    }
 }

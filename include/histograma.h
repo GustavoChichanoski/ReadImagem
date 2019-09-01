@@ -15,7 +15,7 @@
 
 pixel *suavizar_histograma(pixel *histograma,int gray_levels);
 pixel *zero_histograma(pixel *histograma,int gray_levels);
-pixel *calculate_histogram(pixel **imagem,int maxLinha,int maxColuna);
+pixel *calculate_histogram(pixel *imagem,int maxLinha,int maxColuna);
 
 #ifdef __cplusplus
     }

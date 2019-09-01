@@ -154,15 +154,14 @@ typedef struct {
 } pixel; /* pixel */
 
 
-int read_bmp_header(char *file_name,bitmapheader *bmp_header);
-int read_bmp_file_header(char *file_name,bmpfileheader *file_header);
-pixel **read_bmp_image(char *file_name,pixel **array,bmpfileheader *file_header,bitmapheader *bmheader);
-int calculate_pad(long width);
-int is_a_bmp(char *file_name);
-int does_not_exist(char file_name[]);
-pixel **allocate_image_array(long height,long width);
-int write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel **rgb);
-int free_image_array(pixel **the_array,long width,long height);
+int    read_bmp_header(char *file_name,bitmapheader *bmp_header);
+int    read_bmp_file_header(char *file_name,bmpfileheader *file_header);
+pixel *read_bmp_image(char *file_name,pixel *array,bmpfileheader file_header,bitmapheader bmheader);
+int    calculate_pad(long width);
+int    is_a_bmp(char *file_name);
+int    does_not_exist(char file_name[]);
+int    write_bmp(char *file_name,bmpfileheader file_header,bitmapheader bmp_header,pixel *imagem);
+int    free_image_array(pixel *the_array,long width,long height);
 
 #ifdef __cplusplus
     }

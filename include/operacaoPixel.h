@@ -13,20 +13,19 @@
 
     #include <stdio.h>
     #include <malloc.h>
-    #include "../include/bmp.h"
-    #include "../include/conversao.h"
-    #include "../include/detectores.h"
-    #include "../include/histograma.h"
+    #include "conversao.h"
+    #include "bmp.h"
+    #include "detectores.h"
 
-    long  somaCorPixel(pixel pixelEntrada);
-    pixel maiorCordoPixel(pixel pixelEntrada);
-    pixel subAbsPixel(pixel a, pixel b);
-    pixel somaPixel(pixel pixel1,pixel pixel2);
-    pixel dividirPixelporConstante(pixel pixel,int constante);
-    pixel igualarCorPixel(int valor);
-    pixel **allocate_image_array(long width,long height);
-    pixel multiMatrizPixel(pixel imagem,pixel filtro,int ordemMatriz);
-    pixel multiPixel(pixel a,pixel b);
+    long   somaCorPixel(pixel pixelEntrada);
+    pixel  maiorCordoPixel(pixel pixelEntrada);
+    pixel  subAbsPixel(pixel a, pixel b);
+    pixel  somaPixel(pixel pixel1,pixel pixel2);
+    pixel  divPixelporCnt(pixel pixel,int constante);
+    pixel  igualarCorPixel(int valor);
+    pixel *allocate_image_array(long width,long height);
+    pixel  multiMatrizPixel(pixel imagem,pixel filtro,int ordemMatriz);
+    pixel  multiPixel(pixel a,pixel b);
 
 #ifdef __cplusplus
     }
