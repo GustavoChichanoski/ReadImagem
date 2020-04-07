@@ -129,8 +129,6 @@ pixel *convolucao
 */
 pixel *pooling(int stride,int width,int height,pixel *imagem)
 {
-    int new_width  = width  / stride;
-    int new_height = height / stride;
     
     pixel *saida;
     saida = allocate_image_array(width/stride + (width % stride),height/stride + (height % stride));
@@ -167,4 +165,20 @@ pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual)
     c.red   = (MaximoAnterior.red   < ImagemAtual.red)   ? ImagemAtual.red   : MaximoAnterior.red;
     c.green = (MaximoAnterior.green < ImagemAtual.green) ? ImagemAtual.green : MaximoAnterior.green;
     return c;
+}
+
+pixel reluPixel(pixel data)
+{
+    data.red   = (data.red   < 0) ? 0 : data.red;
+    data.blue  = (data.blue  < 0) ? 0 : data.blue;
+    data.green = (data.green < 0) ? 0 : data.green;
+    return data;
+}
+
+pixel *relu(int width,int height,pixel *imagem)
+{
+    for(int position = 0;position < width*height;position++)
+    {
+        imagem[position] = reluPixel(imagem[position]);
+    }
 }
