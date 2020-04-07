@@ -6,6 +6,15 @@
 
 #define GRAY_LEVELS 256
 
+int    read_bmp_header(char *file_name,bitmapheader *bmp_header);
+int    read_bmp_file_header(char *file_name,bmpfileheader *file_header);
+pixel *read_bmp_image(char *file_name,pixel *array,bmpfileheader file_header,bitmapheader bmheader);
+int    calculate_pad(long width);
+int    is_a_bmp(char *file_name);
+int    does_not_exist(char file_name[]);
+int    write_bmp(char *file_name,bmpfileheader file_header,bitmapheader bmp_header,pixel *imagem);
+int    free_image_array(pixel *the_array,long width,long height);
+
 int calculate_pad(long width);
 
 /* Define a ordem de leitura da imagme */
@@ -31,21 +40,21 @@ pixel *read_color_table(file_name,height,width,imagem)
     FILE *fp;
     char buffer[10];
     long position = 0;
-    int x, y, pad;
+    int column, row, pad;
 
     printf("Read color table\n");
 
     fp       = fopen(file_name,"rb");
     position = fseek(fp,54,SEEK_SET);
     pad      = calculate_pad(width);
-
-    for(y = height-1;y > -1;y--)
+    
+    for(column = height-1;column > -1;column--)
     {
-        for(x = 0;x < width;x++)
+        for(row = 0;row < width;row++)
         {
-            position = y*width + x;
-            imagem[position] = igualarCorPixel(0);
+            position = column*width + row;
             fread(buffer,sizeof(char),3,fp);
+            imagem[position] = igualarCorPixel(0);
             imagem[position].blue  = buffer[0];
             imagem[position].green = buffer[1];
             imagem[position].red   = buffer[2];
@@ -62,9 +71,7 @@ pixel *read_color_table(file_name,height,width,imagem)
  * Entradas :                                            *
  * char *file_name - nome do arquivo que contem a imagem *
  * bmpfileheader - cabecalho do arquivo                  */
-int read_bmp_file_header(file_name,file_header)
-    char *file_name;
-    bmpfileheader *file_header;
+int read_bmp_file_header(char *file_name,bmpfileheader *file_header)
 {
 
     char buffer[10];
@@ -118,9 +125,7 @@ int read_bmp_file_header(file_name,file_header)
  * Entrada :                                      *
  * char *file_name - nome do arquivo da imagem    *
  * bitmapheader *bmp_header - cabecalho da imagem */
-int read_bmp_header(file_name,bmp_header)
-    char *file_name;
-    bitmapheader *bmp_header;
+int read_bmp_header(char *file_name,bitmapheader *bmp_header)
 {
 
     char buffer[10];
@@ -204,9 +209,9 @@ pixel *read_bmp_image(file_name,array,file_header,bmheader)
     bmpfileheader file_header;
     bitmapheader bmheader;
 {
-
+    
     printf("Read bmp image\n");
-
+    
     FILE *fp;
     int x, y, pad = 0, place = 0, i;
     long colors = 0, height = 0, width = 0, position = 0;
@@ -235,18 +240,16 @@ pixel *read_bmp_image(file_name,array,file_header,bmheader)
  * Verifica se a largura da imagem é um numero divisivel por *
  * 4, se for não adiciona pads. Caso seja diferente, indica  *
  * o números de bytes adicionados para completar essa regra  */
-int calculate_pad(width)
-    long width;
+int calculate_pad(long width)
 {
-    return ((width%4) == 0) ? 0 : (4 - (width%4));
+    return ((width % 4) == 0) ? 0 : (4 - (width % 4));
 }
 
 /* is_a_bmp(...)                                                *
  * This function looks at a file to see if it is a bmp file.    *
  * First look at the file extension. Next look at the filetype  *
  * to ensure it is 0x4d42                                       */
-int is_a_bmp(file_name)
-    char *file_name;
+int is_a_bmp(char *file_name)
 {
 
     char *cc;
@@ -377,10 +380,11 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
     printf("Cabecalho escrito\n");
 
     pad = calculate_pad(width);
+    printf("Pad: %d\n",pad);
 
     for(y = height-1;y > -1;y--)
     {
-        for(x = 0;x < width;x++)
+        for(x = 0;x < width; x++)
         {
             position = y*width + x;
             insert_long_into_buffer(buffer,0,imagem[position].blue);
@@ -390,13 +394,12 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
             insert_long_into_buffer(buffer,0,imagem[position].red);
             fwrite(buffer,sizeof(char),1,fp);
         }
-        if(pad > 0)
-        {
-            buffer[0] = 0;
-            buffer[1] = 0;
-            buffer[2] = 0;
-            fwrite(buffer,sizeof(char),pad,fp);
-        }
+        fwrite(buffer,sizeof(char),pad,fp);
+        // if(pad > 0)
+        // {
+        //     buffer[0] = 0; buffer[1] = 0; buffer[2] = 0;
+        //     fwrite(buffer,sizeof(char),pad,fp);
+        // }
     }
 
     fclose(fp);

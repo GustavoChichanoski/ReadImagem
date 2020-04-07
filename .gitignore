@@ -47,6 +47,12 @@
 # Kernel Module Compile Results
 *.mod*
 *.cmd
+
+# Folders
+img
+*.js
+*.json
+
 .tmp_versions/
 modules.order
 Module.symvers

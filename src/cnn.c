@@ -1,158 +1,170 @@
 #include "../include/cnn.h"
 
-int mask[54] = {
-    248,220,100,141,110, 10,123,  2, 15,
-    102,124, 52,240,230,120, 10,  1,  5,
-     50, 10,  5,120,240, 30, 20, 30, 40,
-    192,128, 64,255,128,128,192,  0, 64,
-    165,128, 89,255,128,  0,165,128, 89,
-    123,110,189,200, 28,100,120,141,179
-};
+#define RELU 0
 
-/* Configura o filtro */
-pixel *setup_filter(pixel *filtro,int numeroFiltro)
+unsigned long kernel_Image[25] = {1,1,1,0,0, 0,1,1,1,0, 0,0,1,1,1, 0,0,1,1,0, 0,1,1,0,0};
+unsigned long resultado[9]     = {4,3,4,2,4,3,2,3,4};
+
+void   imprimeMatriz(int width,int height,pixel *matriz);
+int    random_number(int min_num,int max_num);
+void   testeConvolucao();
+
+pixel *convolucao
+(
+    long img_width,long img_height,pixel *image,
+    int kernel_degree,pixel *kernel
+);
+
+// example of use: int x = random_number(0,255);
+int random_number(int min_num,int max_num)
 {
- 
-    int posicao = 0, posFiltro = 0;
- 
-    for(int nFilter = 0;nFilter < numeroFiltro;nFilter++)
+    int result = 0, low_num = 0, high_num = 0;
+    low_num    = (min_num < max_num) ? min_num : max_num + 1;
+    high_num   = (min_num > max_num) ? min_num : max_num + 1;
+    result     = (rand() % (high_num - low_num)) + low_num;
+    return result;
+}
+
+void testeConvolucao()
+{
+    printf("Teste Convoluacao:\n");
+    int teste[9]   = {1,0,1,0,1,0,1,0,1};
+    int conv[25]   = {1,1,1,0,0, 0,1,1,1,0, 0,0,1,1,1, 0,0,1,1,0, 0,1,1,0,0};
+    int result[25] = {2,2,3,1,1, 1,4,3,4,1, 1,2,4,3,3, 1,2,3,4,1, 0,2,2,1,1};
+
+    pixel *kernel; pixel *imagem;pixel *out;
+
+    kernel = allocate_image_array(3,3);
+    out    = allocate_image_array(5,5);
+    imagem = allocate_image_array(5,5);
+
+    for(int position = 0;position < 9;position++)
     {
-        for(posicao = 0;posicao < 9;posicao++)
-        {
-            filtro[posicao].blue  = mask[posFiltro];
-            filtro[posicao].green = mask[posFiltro+18];
-            filtro[posicao].red   = mask[posFiltro+36];
-            posFiltro++;
-        }
+        kernel[position] = igualarCorPixel(teste[position]);
+    }
+    for(int position = 0;position < 25;position++)
+    {
+        imagem[position] = igualarCorPixel(conv[position]);
     }
 
-    return filtro;
+    out = convolucao(5,5,imagem,3,kernel);
+
+    printf("Matriz Saida:\n");
+    imprimeMatriz(5,5,out);
 
 }
 
-pixel *matrizConvolucao(pixel *imagem,int x,int y,int maxLinhas,int maxColunas,int ordemMatriz)
+void imprimeMatriz(int width,int height,pixel *matriz)
 {
-
-    int meioMatriz       = ordemMatriz/2;
-    int linhaReferencia  = y - meioMatriz;
-    int colunaReferencia = x - meioMatriz;
-    int linhaImagem      = 0;
-    int colunaImagem     = 0;
-    int linhaMatriz      = 0;
-    int colunaMatriz     = 0;
-    int posicaoMatriz    = 0;
-    pixel *saida, zero;
-
-    printf("Culpa do Malloc ?\n");
-
-    zero  = igualarCorPixel(0);
-    saida = allocate_image_array(ordemMatriz,ordemMatriz);
-
-    printf("Nao\n");
-
-    for(linhaMatriz = 0;linhaMatriz < ordemMatriz;linhaMatriz++)
+    for(int position = 0;position < width*height;position++)
     {
-        for(colunaMatriz = 0;colunaMatriz < ordemMatriz;colunaMatriz++)
+        int pos_x = position % width;
+        int pos_y = position / width;
+        if(pos_x == 0 && pos_y != 0)
         {
+            printf("\n");
+        }
+        printf("\t[%d][%d] : %d",pos_y,pos_x,matriz[position]);
+    }
+}
 
-            linhaImagem          = linhaReferencia  + linhaMatriz;
-            colunaImagem         = colunaReferencia + colunaMatriz;
-            saida[posicaoMatriz] = zero;
+pixel *fill_matriz(pixel *a,int b[], int length)
+{
+    for(int position = 0;position < length;position++)
+    {
+        a[position] = igualarCorPixel(b[position]);
+    }
+}
 
-            if( -1 < linhaImagem && linhaImagem < maxLinhas && -1 < colunaImagem && colunaImagem < maxColunas)
+pixel *setup_kernel(pixel *kernel,int max_position)
+{
+    for(int position = 0;position < max_position;position++)
+    {
+        kernel[position] = igualarCorPixel(random_number(0,255));
+    }
+    return kernel;
+}
+
+pixel *convolucao
+(
+    long img_width,long img_height,pixel *image,
+    int kernel_degree,pixel *kernel
+)
+{
+    pixel *saida;
+    
+    saida = allocate_image_array(image[0].width,image[0].heigth);
+    int img_pos_max    = img_width*img_height;
+    int kernel_pos_max = kernel_degree*kernel_degree;
+    
+    for(int img_pos = 0;img_pos < img_pos_max;img_pos++)
+    {
+        int img_pos_y = img_pos / img_width;
+        int img_pos_x = img_pos % img_width;
+        saida[img_pos] = igualarCorPixel(0);
+        for(int kernel_pos = 0;kernel_pos < kernel_pos_max;kernel_pos++)
+        {
+            int kernel_pos_x = kernel_pos / kernel_degree;
+            int kernel_pos_y = kernel_pos % kernel_degree;
+            int position_x   = img_pos_x + kernel_pos_x - kernel_degree/2;
+            int position_y   = img_pos_y + kernel_pos_y - kernel_degree/2;
+            if(-1 < position_x && position_x < img_width)
             {
-                printf("posImagem : %d - %d ",maxColunas*linhaImagem + colunaImagem,maxLinhas*maxColunas);
-                printf("posMatriz : %d\n", posicaoMatriz);
-                saida[posicaoMatriz] = imagem[maxColunas*linhaImagem + colunaImagem];
+                if(-1 < position_y && position_y < img_height)
+                {
+                    int position   = position_y*img_width + position_x;
+                    saida[img_pos] = somaPixel(saida[img_pos],multiPixel(kernel[kernel_pos],image[position]));
+                }
             }
-
-            posicaoMatriz++;
-
         }
     }
-
-    printf("Saiu da matriz Convolucao\n");
-
     return saida;
-
 }
 
-pixel multConvFilter(pixel *conv,pixel *filter,int n)
+/*
+    width  : number of column of image
+    height : number of row of image
+    image  : RGB of image
+    stride : how big are the steps of the filter
+*/
+pixel *pooling(int stride,int width,int height,pixel *imagem)
 {
-
-    int posicao = 0, linhaMax = n*n;
-    pixel saida, aux;
-
-    saida = igualarCorPixel(0);
-
-    for(int linhas = 0;linhas < linhaMax;linhas++)
+    int new_width  = width  / stride;
+    int new_height = height / stride;
+    
+    pixel *saida;
+    saida = allocate_image_array(width/stride + (width % stride),height/stride + (height % stride));
+    
+    int pos_x = 0, pos_y = 0;
+    
+    for (pos_y = 0; pos_y < height; pos_y + stride)
     {
-        aux   = multiPixel(conv[posicao],filter[posicao]);
-        aux   = divPixelporCnt(aux,255);
-        saida = somaPixel(saida,aux);
-    }
-
-    return divPixelporCnt(saida,9);
-
-}
-
-pixel *convolucao(int maxLinhas,int maxColunas,pixel *imagem)
-{
-
-    pixel *convolucao, *filtro, *saida;
-    int linhas, colunas, posicao = 0;
-
-    convolucao   = allocate_image_array(3,3);
-    saida        = allocate_image_array(linhas,colunas);
-    filtro       = allocate_image_array(6,9);
-    filtro       = setup_filter(filtro,2);
-
-    for(linhas = 0;linhas < maxLinhas;linhas++)
-    {
-        for(colunas = 0;colunas < maxColunas;colunas++)
+        for (pos_x = 0; pos_x < width; pos_x + stride)
         {
-            printf("Entrou da matriz da Convolucao [%d][%d] - %d",linhas,colunas,posicao);
-            convolucao     = matrizConvolucao(imagem,colunas,linhas,maxLinhas,maxColunas,3);
-            printf("Saiu   da matriz da Convolucao [%d][%d] - %d\n",linhas,colunas,posicao);
-            printf("Entrou na multiplicacao da Convolucao [%d][%d] - %d",linhas,colunas,posicao);
-            printf(" - [%d][%d]\n",maxLinhas,maxColunas);
-            saida[posicao] = multConvFilter(convolucao,filtro,3);
-            printf("Saiu da multiplicacao da Convolucao\n");
-            posicao++;
+            pixel max_valor = imagem[pos_x*width + pos_x];
+            for (int i = pos_x;i < pos_x + stride && i < width;i++)
+            {
+                for (int j = pos_y;j < pos_y + stride && j < height;j++)
+                {
+                    max_valor = maxValorPixel(max_valor,imagem[pos_y*width + pos_x]);
+                }
+            }
+            saida[pos_y*width + pos_x] = max_valor;
         }
     }
-
-    printf("Saiu da convolucao");
-
     return saida;
-
 }
 
-pixel *cnn(pixel *imagem,int maxLinhas,int maxColunas)
+pixel medValorPixel(pixel medAnt, pixel image)
 {
-    return convolucao(maxLinhas,maxColunas,imagem);
-    /*while(maxLinhas > 20 || maxColunas > 20)
-    {
-        printf("Saiu da convolucao\n");
-        imagem = pooling(imagem,maxLinhas,maxColunas,2,MAX);
-        printf("Saiu do pooling\n");
-        maxLinhas  /= 2; 
-        maxColunas /= 2;
-        cnn(imagem,maxLinhas,maxColunas);
-    }
-    return imagem;*/
+    return divPixelporCnt(somaPixel(medAnt,image),2);
 }
 
-pixel *relu(pixel *imagem,int lenght)
+pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual)
 {
-
-    for(int i = 0;i < lenght;i++)
-    {
-        if(imagem[i].blue  < 0) imagem[i].blue  = 0;
-        if(imagem[i].green < 0) imagem[i].green = 0;
-        if(imagem[i].red   < 0) imagem[i].red   = 0;
-    }
-
-    return imagem;
-
+    pixel c;
+    c.blue  = (MaximoAnterior.blue  < ImagemAtual.blue)  ? ImagemAtual.blue  : MaximoAnterior.blue;
+    c.red   = (MaximoAnterior.red   < ImagemAtual.red)   ? ImagemAtual.red   : MaximoAnterior.red;
+    c.green = (MaximoAnterior.green < ImagemAtual.green) ? ImagemAtual.green : MaximoAnterior.green;
+    return c;
 }

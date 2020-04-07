@@ -264,7 +264,7 @@ pixel *gray_scale(maxColunas,maxLinhas,imagem)
         /* Loop para percorrer as colunas da matriz */
         for(coluna = 0;coluna < maxColunas;coluna++)
         {
-            imagem[posicao] = maiorCordoPixel(imagem[posicao]);
+            imagem[posicao] = igualarCorPixel(imagem[posicao].blue);
             posicao++;
         }
     }

@@ -4,7 +4,10 @@ CC=gcc
 C_FLAGS=-I./include -O2
 
 
-all: build/ read_image
+all: build/ read_image exec
+
+exec:
+	.\read_image
 
 read_image: src/main.c build/bmp.o build/conversao.o build/detectores.o build/operacaoPixel.o build/cnn.o build/pooling.o
 	${CC} ${C_FLAGS} src/main.c build/operacaoPixel.o build/detectores.o build/bmp.o build/pooling.o build/conversao.o build/cnn.o -o read_image
@@ -28,8 +31,9 @@ build/cnn.o: build/ src/cnn.c
 	${CC} ${C_FLAGS} -c src/cnn.c -o build/cnn.o
 
 build/:
-	mkdir -p build
+	if not exist build mkdir build
 
 clean:
-	rm -r build
-	rm read_image
+	rmdir /Q /S build
+	del main.o
+	del read_image.exe

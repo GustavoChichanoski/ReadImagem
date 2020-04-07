@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #ifndef BMP_H
-#define	BMP_H
+#define BMP_H
 
 /*   N O T E
  *   P O R T A B I L I T Y   I S S U E
@@ -148,9 +148,11 @@ typedef struct {
  * unsigned long blue[4]
  * unsigned long green[4] */
 typedef struct {
-    unsigned long blue;
-    unsigned long green;
-    unsigned long red;
+    long blue;
+    long green;
+    long red;
+    int  width;
+    int  heigth;
 } pixel; /* pixel */
 
 
