@@ -9,8 +9,11 @@ all: build/ read_image exec
 exec:
 	.\read_image
 
-read_image: src/main.c build/bmp.o build/conversao.o build/detectores.o build/operacaoPixel.o build/cnn.o build/pooling.o
-	${CC} ${C_FLAGS} src/main.c build/operacaoPixel.o build/detectores.o build/bmp.o build/pooling.o build/conversao.o build/cnn.o -o read_image
+read_image: src/main.c build/bmp.o build/conversao.o build/detectores.o build/operacaoPixel.o build/matriz.o  build/cnn.o build/pooling.o build/neuralNetwork.o
+	${CC} ${C_FLAGS} src/main.c build/operacaoPixel.o build/detectores.o build/bmp.o build/matriz.o build/pooling.o build/conversao.o build/cnn.o build/neuralNetwork.o -o read_image
+
+build/matriz.o: build/ src/matriz.c
+	$(CC) ${C_FLAGS} -c src/matriz.c -o build/matriz.o
 
 build/pooling.o: build/ src/pooling.c
 	$(CC) ${C_FLAGS} -c src/pooling.c -o build/pooling.o
@@ -26,6 +29,9 @@ build/bmp.o: build/ src/bmp.c
 
 build/detectores.o: build/ src/detectores.c
 	${CC} ${C_FLAGS} -c src/detectores.c -o build/detectores.o
+
+build/neuralNetwork.o: build/ src/neuralNetwork.c
+	${CC} ${C_FLAGS} -c src/neuralNetwork.c -o build/neuralNetwork.o
 
 build/cnn.o: build/ src/cnn.c
 	${CC} ${C_FLAGS} -c src/cnn.c -o build/cnn.o

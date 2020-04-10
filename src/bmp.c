@@ -18,8 +18,7 @@ int    free_image_array(pixel *the_array,long width,long height);
 int calculate_pad(long width);
 
 /* Define a ordem de leitura da imagme */
-int ordem_de_leitura(height)
-    long height;
+int ordem_de_leitura(long height)
 {
     return (height > 0) ? 1 : 0;
 }
@@ -32,8 +31,8 @@ int ordem_de_leitura(height)
  * Saida :                                          *
  * pixel **imagem - mapa de saida                   */
 pixel *read_color_table(file_name,height,width,imagem)
-    char *file_name;
-    long height,width;
+    char  *file_name;
+    long   height,width;
     pixel *imagem;
 {
 

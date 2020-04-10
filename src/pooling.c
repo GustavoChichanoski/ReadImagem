@@ -2,6 +2,8 @@
 
 int padWidth, padHeight;
 
+pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual);
+
 void calcPad(int poolingOrdem,int height, int width)
 {
     padWidth  = width  % poolingOrdem;
@@ -87,32 +89,40 @@ pixel *matrizPooling(imagem,matriz,height,width,y,x,ordem)
     return matriz;
 }
 
-pixel *pooling(pixel *imagem,int height,int width,int poolingOrdem,int tipo)
+/*
+    width  : number of column of image
+    height : number of row of image
+    image  : RGB of image
+    stride : how big are the steps of the filter
+*/
+pixel *pooling(int stride,int width,int height,pixel *imagem)
 {
-    
-    int posicao = 0, posNovaImg = 0, y = 0, x = 0;
-    pixel *matriz,*novaImagem;
-    
-    matriz     = allocate_image_array(width,height);
-    novaImagem = allocate_image_array(width/3,height/3);
-    
-    for(y = 0;y < height;y += poolingOrdem)
+    pixel *saida;
+    saida = allocate_image_array(width/stride + (width % stride),height/stride + (height % stride));
+    int pos_x = 0, pos_y = 0;
+    for (pos_y = 0; pos_y < height; pos_y + stride)
     {
-        for(x = 0;x < width;x += poolingOrdem)
+        for (pos_x = 0; pos_x < width; pos_x + stride)
         {
-            matriz = matrizPooling(imagem,matriz,height,width,y,x,3);
-            if(tipo)
+            pixel max_valor = imagem[pos_x*width + pos_x];
+            for (int i = pos_x;i < pos_x + stride && i < width;i++)
             {
-                novaImagem[posNovaImg] = maxPooling(matriz,3);
+                for (int j = pos_y;j < pos_y + stride && j < height;j++)
+                {
+                    max_valor = maxValorPixel(max_valor,imagem[pos_y*width + pos_x]);
+                }
             }
-            else
-            {
-                novaImagem[posNovaImg] = medPooling(matriz,3);
-            }
-            posNovaImg++;
+            saida[pos_y*width + pos_x] = max_valor;
         }
     }
-    
-    return novaImagem;
-    
+    return saida;
+}
+
+pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual)
+{
+    pixel c;
+    c.blue  = (MaximoAnterior.blue  < ImagemAtual.blue)  ? ImagemAtual.blue  : MaximoAnterior.blue;
+    c.red   = (MaximoAnterior.red   < ImagemAtual.red)   ? ImagemAtual.red   : MaximoAnterior.red;
+    c.green = (MaximoAnterior.green < ImagemAtual.green) ? ImagemAtual.green : MaximoAnterior.green;
+    return c;
 }

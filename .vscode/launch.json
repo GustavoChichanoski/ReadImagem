@@ -2,6 +2,7 @@
     "version" : "0.2.0",
     "configurations": [
         {
+            "label": "g++.exe build active file",
             "name": "(gdb) Launch",
             "preLaunchTask": "build",
             "type": "cppdbg",

@@ -6,7 +6,6 @@ unsigned long kernel_Image[25] = {1,1,1,0,0, 0,1,1,1,0, 0,0,1,1,1, 0,0,1,1,0, 0,
 unsigned long resultado[9]     = {4,3,4,2,4,3,2,3,4};
 
 void   imprimeMatriz(int width,int height,pixel *matriz);
-int    random_number(int min_num,int max_num);
 void   testeConvolucao();
 
 pixel *convolucao
@@ -15,15 +14,7 @@ pixel *convolucao
     int kernel_degree,pixel *kernel
 );
 
-// example of use: int x = random_number(0,255);
-int random_number(int min_num,int max_num)
-{
-    int result = 0, low_num = 0, high_num = 0;
-    low_num    = (min_num < max_num) ? min_num : max_num + 1;
-    high_num   = (min_num > max_num) ? min_num : max_num + 1;
-    result     = (rand() % (high_num - low_num)) + low_num;
-    return result;
-}
+
 
 void testeConvolucao()
 {
@@ -127,44 +118,36 @@ pixel *convolucao
     image  : RGB of image
     stride : how big are the steps of the filter
 */
-pixel *pooling(int stride,int width,int height,pixel *imagem)
-{
+// pixel *pooling(int stride,int width,int height,pixel *imagem)
+// {
     
-    pixel *saida;
-    saida = allocate_image_array(width/stride + (width % stride),height/stride + (height % stride));
+//     pixel *saida;
+//     saida = allocate_image_array(width/stride + (width % stride),height/stride + (height % stride));
     
-    int pos_x = 0, pos_y = 0;
+//     int pos_x = 0, pos_y = 0;
     
-    for (pos_y = 0; pos_y < height; pos_y + stride)
-    {
-        for (pos_x = 0; pos_x < width; pos_x + stride)
-        {
-            pixel max_valor = imagem[pos_x*width + pos_x];
-            for (int i = pos_x;i < pos_x + stride && i < width;i++)
-            {
-                for (int j = pos_y;j < pos_y + stride && j < height;j++)
-                {
-                    max_valor = maxValorPixel(max_valor,imagem[pos_y*width + pos_x]);
-                }
-            }
-            saida[pos_y*width + pos_x] = max_valor;
-        }
-    }
-    return saida;
-}
+//     for (pos_y = 0; pos_y < height; pos_y + stride)
+//     {
+//         for (pos_x = 0; pos_x < width; pos_x + stride)
+//         {
+//             pixel max_valor;
+//             max_valor = imagem[pos_x*width + pos_x];
+//             for (int i = pos_x;i < pos_x + stride && i < width;i++)
+//             {
+//                 for (int j = pos_y;j < pos_y + stride && j < height;j++)
+//                 {
+//                     max_valor = maxValorPixel(max_valor,imagem[pos_y*width + pos_x]);
+//                 }
+//             }
+//             saida[pos_y*width + pos_x] = max_valor;
+//         }
+//     }
+//     return saida;
+// }
 
 pixel medValorPixel(pixel medAnt, pixel image)
 {
     return divPixelporCnt(somaPixel(medAnt,image),2);
-}
-
-pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual)
-{
-    pixel c;
-    c.blue  = (MaximoAnterior.blue  < ImagemAtual.blue)  ? ImagemAtual.blue  : MaximoAnterior.blue;
-    c.red   = (MaximoAnterior.red   < ImagemAtual.red)   ? ImagemAtual.red   : MaximoAnterior.red;
-    c.green = (MaximoAnterior.green < ImagemAtual.green) ? ImagemAtual.green : MaximoAnterior.green;
-    return c;
 }
 
 pixel reluPixel(pixel data)
@@ -173,12 +156,4 @@ pixel reluPixel(pixel data)
     data.blue  = (data.blue  < 0) ? 0 : data.blue;
     data.green = (data.green < 0) ? 0 : data.green;
     return data;
-}
-
-pixel *relu(int width,int height,pixel *imagem)
-{
-    for(int position = 0;position < width*height;position++)
-    {
-        imagem[position] = reluPixel(imagem[position]);
-    }
 }
