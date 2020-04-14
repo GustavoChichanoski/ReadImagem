@@ -1,3 +1,6 @@
+#ifndef BMP_H
+#define BMP_H
+
 /* File:   read_BMP.h
  * Author: Gustavo
  * Library for read bmp files
@@ -5,9 +8,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifndef BMP_H
-#define BMP_H
 
 /*   N O T E
  *   P O R T A B I L I T Y   I S S U E
@@ -28,8 +28,8 @@
  *   Now you need to make changes in mymsc.c
  **********************************************/
 
-/*******#define MSC 1******/
-/*******#undef  OTHERC******/
+/******* #define MSC 1  ******/
+/******* #undef  OTHERC ******/
 #define OTHERC 1
 #undef  MSC
 

@@ -1,19 +1,20 @@
 .PHONY: all clean
 
-CC=gcc
-C_FLAGS=-I./include -O2
+CC = gcc
+C_FLAGS = -I./include -O2 -g3
+SRC = $(wildcard *.c)
+OBJ := $(patsubst %.c,%.o,$(wildcard *.c))
 
+all: build/ read_image
 
-all: build/ read_image exec
+foo: $(OBJ)
+	cc -o foo $(C_FLAGS) $(OBJ)
 
-exec:
-	.\read_image
-
-read_image: src/main.c build/bmp.o build/conversao.o build/detectores.o build/operacaoPixel.o build/matriz.o  build/cnn.o build/pooling.o build/neuralNetwork.o
+read_image: src/main.c build/bmp.o build/conversao.o build/detectores.o build/operacaoPixel.o build/matriz.o build/cnn.o build/pooling.o build/neuralNetwork.o
 	${CC} ${C_FLAGS} src/main.c build/operacaoPixel.o build/detectores.o build/bmp.o build/matriz.o build/pooling.o build/conversao.o build/cnn.o build/neuralNetwork.o -o read_image
 
-build/matriz.o: build/ src/matriz.c
-	$(CC) ${C_FLAGS} -c src/matriz.c -o build/matriz.o
+build/matriz.o: build/ src/operacaoMatriz.c
+	$(CC) ${C_FLAGS} -c src/operacaoMatriz.c -o build/matriz.o
 
 build/pooling.o: build/ src/pooling.c
 	$(CC) ${C_FLAGS} -c src/pooling.c -o build/pooling.o
@@ -39,7 +40,11 @@ build/cnn.o: build/ src/cnn.c
 build/:
 	if not exist build mkdir build
 
+print: scr/*.c
+	lpr -p $?
+	touch print
+
 clean:
 	rmdir /Q /S build
 	del main.o
-	del read_image.exe
+	del *.exe

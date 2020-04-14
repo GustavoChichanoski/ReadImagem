@@ -394,11 +394,11 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
             fwrite(buffer,sizeof(char),1,fp);
         }
         fwrite(buffer,sizeof(char),pad,fp);
-        // if(pad > 0)
-        // {
-        //     buffer[0] = 0; buffer[1] = 0; buffer[2] = 0;
-        //     fwrite(buffer,sizeof(char),pad,fp);
-        // }
+        if(pad > 0)
+        {
+            buffer[0] = 0; buffer[1] = 0; buffer[2] = 0;
+            fwrite(buffer,sizeof(char),pad,fp);
+        }
     }
 
     fclose(fp);

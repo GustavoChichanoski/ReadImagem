@@ -5,10 +5,11 @@
 #include "../include/bmp.h"
 #include "../include/detectores.h"
 #include "../include/cnn.h"
-#include "../include/matriz.h"
+#include "../include/operacaoMatriz.h"
 #include "../include/processamento.h"
+#include "../include/neuralNetwork.h"
 
-int main(int argc, char *argv[ ]){
+int main(int argc, char *argv[]){
     
     // srand(time(NULL));
     // long height, width;
@@ -64,9 +65,9 @@ int main(int argc, char *argv[ ]){
     // printf("Imagem criada\n");
     // free(imagem);
     
-    // testeConvolucao();
+    testeConvolucao();
     testeMatriz();
     
     return 0;
-
+    
 }

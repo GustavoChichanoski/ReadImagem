@@ -3,9 +3,6 @@
 #include "bmp.h"
 #include "operacaoPixel.h"
 
-#define MAX 1
-#define MED 0
-
 pixel  maxPooling(pixel *matriz,int ordemMatriz);
 void   calcPad(int poolingOrdem,int height,int width);
 pixel  maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual);

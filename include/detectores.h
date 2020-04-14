@@ -1,10 +1,16 @@
+#ifndef DETECTORES_H_INCLUDED
+#define DETECTORES_H_INCLUDED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "bmp.h"
 #include "conversao.h"
 
-#ifndef DETECTORES_H_INCLUDED
-#define DETECTORES_H_INCLUDED
+#ifdef DETECTORES_EXPORTS
+    #define DETECTORES_API __declspec(dllexport)
+#else
+    #define DETECTORES_API __declspec(dllimport)
+#endif
 
 #ifdef __cplusplus
     extern "C" {
