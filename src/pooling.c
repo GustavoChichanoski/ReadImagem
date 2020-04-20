@@ -95,34 +95,45 @@ pixel *matrizPooling(imagem,matriz,height,width,y,x,ordem)
     image  : RGB of image
     stride : how big are the steps of the filter
 */
-pixel *pooling(int stride,int width,int height,pixel *imagem)
+pxMat pooling(int stride,pxMat img)
 {
-    pixel *saida;
-    saida = allocate_image_array(width/stride + (width % stride),height/stride + (height % stride));
-    int pos_x = 0, pos_y = 0;
-    for (pos_y = 0; pos_y < height; pos_y + stride)
+    pxMat saida;
+    pixel max_valor;
+    int column = 0;
+    column = img.column / stride + 1;
+    // column = img.column / stride + (stride - img.column % stride);
+    // column = (img.column / stride);
+    int row = 0;
+    // row = img.row / stride + (stride - img.row % stride);
+    row = img.row / stride + 1;
+    // row = (img.row / stride);
+    int pos_x = 0, pos_y = 0, i = 0, j = 0, position = 0;
+    saida = createPixelMatriz(row,column);
+    for (pos_y = 0; pos_y < img.row; pos_y = pos_y + stride)
     {
-        for (pos_x = 0; pos_x < width; pos_x + stride)
+        for (pos_x = 0; pos_x < img.column;pos_x = pos_x + stride)
         {
-            pixel max_valor = imagem[pos_x*width + pos_x];
-            for (int i = pos_x;i < pos_x + stride && i < width;i++)
+            max_valor = img.image[pos_y*img.column + pos_x];
+            for (i = pos_x;i < pos_x + stride && i < img.column;i++)
             {
-                for (int j = pos_y;j < pos_y + stride && j < height;j++)
+                for (j = pos_y; j < pos_y + stride && j < img.row; j++)
                 {
-                    max_valor = maxValorPixel(max_valor,imagem[pos_y*width + pos_x]);
+                    max_valor = maxValorPixel(max_valor,img.image[j*img.column + i]);
                 }
             }
-            saida[pos_y*width + pos_x] = max_valor;
+            saida.image[position] = max_valor;
+            position++;
         }
     }
+    saida.row = row;
+    saida.column = column;
     return saida;
 }
 
 pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual)
 {
-    pixel c;
-    c.blue  = (MaximoAnterior.blue  < ImagemAtual.blue)  ? ImagemAtual.blue  : MaximoAnterior.blue;
-    c.red   = (MaximoAnterior.red   < ImagemAtual.red)   ? ImagemAtual.red   : MaximoAnterior.red;
-    c.green = (MaximoAnterior.green < ImagemAtual.green) ? ImagemAtual.green : MaximoAnterior.green;
-    return c;
+    MaximoAnterior.blue  = (MaximoAnterior.blue  < ImagemAtual.blue ) ? ImagemAtual.blue  : MaximoAnterior.blue;
+    MaximoAnterior.red   = (MaximoAnterior.red   < ImagemAtual.red  ) ? ImagemAtual.red   : MaximoAnterior.red;
+    MaximoAnterior.green = (MaximoAnterior.green < ImagemAtual.green) ? ImagemAtual.green : MaximoAnterior.green;
+    return MaximoAnterior;
 }

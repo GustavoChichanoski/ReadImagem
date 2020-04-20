@@ -151,11 +151,16 @@ typedef struct {
     long blue;
     long green;
     long red;
-    int  width;
-    int  heigth;
 } pixel; /* pixel */
 
+typedef struct pxmat
+{
+    pixel *image;
+    int row;
+    int column;
+} pxMat;
 
+pxMat createPixelMatriz(int row,int column);
 int    read_bmp_header(char *file_name,bitmapheader *bmp_header);
 int    read_bmp_file_header(char *file_name,bmpfileheader *file_header);
 pixel *read_bmp_image(char *file_name,pixel *array,bmpfileheader file_header,bitmapheader bmheader);

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../include/conversao.h"
 #include "../include/bmp.h"
+#include "../include/operacaoPixel.h"
 
 #define GRAY_LEVELS 256
 
@@ -47,18 +48,19 @@ pixel *read_color_table(file_name,height,width,imagem)
     position = fseek(fp,54,SEEK_SET);
     pad      = calculate_pad(width);
     
-    for(column = height-1;column > -1;column--)
+    for(row = height-1;row > -1;row--)
     {
-        for(row = 0;row < width;row++)
+        for(column = 0;column < width;column++)
         {
-            position = column*width + row;
+            position = row*width + column;
             fread(buffer,sizeof(char),3,fp);
             imagem[position] = igualarCorPixel(0);
             imagem[position].blue  = buffer[0];
             imagem[position].green = buffer[1];
             imagem[position].red   = buffer[2];
         }
-        fread(buffer,sizeof(char),pad,fp);
+        if(pad > 0)
+            fread(buffer,sizeof(char),pad,fp);
     }
 
     fclose(fp);
@@ -293,12 +295,20 @@ int free_bmp(long lenght,pixel *imagem)
     return 1;
 }
 
-/* Escreve um arquivo da imagem                    *
- * Entradas :                                      *
- * char *file_name - nome do arquivo               *
- * bmpfilheader file_header - cabecalho do arquivo *
- * bitmapheader bmp_header - cabeacalho da imagem  *
- * pixel *imagem -  matriz de pixel de imagem      */
+pxMat createPixelMatriz(int row,int column)
+{
+    pxMat matriz;
+    matriz.column = column;
+    matriz.row    = row;
+    matriz.image  = allocate_image_array(row,column);
+}
+
+unsigned long calcSize(int width,int height,int offset,int pad)
+{
+    // return offset + (width + calculate_pad(width)) * height * 3;
+    return offset + height * (width * 3 + pad);
+}
+
 int write_bmp(file_name,file_header,bmp_header,imagem)
     char          *file_name;
     bmpfileheader  file_header;
@@ -315,9 +325,11 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
     int x, y, pad, position;
     long width  = bmp_header.width;
     long height = bmp_header.height;
-
+    pad = calculate_pad(width);
+    
+    printf("size : %lu,%lu\n",calcSize(bmp_header.width,bmp_header.height,file_header.offset,pad),file_header.filesize);
+    file_header.filesize = calcSize(bmp_header.width,bmp_header.height,file_header.offset,pad);
     fp = fopen(file_name,"wb");
-
     if(fp == NULL)
     {
         printf("Arquivo: %s não encontrado\n",file_name);
@@ -327,60 +339,56 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
     
     {
         insert_ushort_into_buffer(buffer,0,file_header.filetype);
-        fwrite(buffer,1,2,fp);
+        fwrite(buffer,sizeof(char),2,fp);
 
         insert_ulong_into_buffer(buffer,0,file_header.filesize);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_short_into_buffer(buffer,0,file_header.reserved1);
-        fwrite(buffer,1,2,fp);
+        fwrite(buffer,sizeof(char),2,fp);
 
         insert_short_into_buffer(buffer,0,file_header.reserved2);
-        fwrite(buffer,1,2,fp);
+        fwrite(buffer,sizeof(char),2,fp);
 
         insert_ulong_into_buffer(buffer,0,file_header.offset);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
     }
     {
         insert_ulong_into_buffer(buffer,0,bmp_header.size);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_long_into_buffer(buffer,0,bmp_header.width);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_long_into_buffer(buffer,0,bmp_header.height);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_short_into_buffer(buffer,0,bmp_header.planes);
-        fwrite(buffer,1,2,fp);
+        fwrite(buffer,sizeof(char),2,fp);
 
         insert_short_into_buffer(buffer,0,bmp_header.bitsperpixel);
-        fwrite(buffer,1,2,fp);
+        fwrite(buffer,sizeof(char),2,fp);
 
         insert_ulong_into_buffer(buffer,0,bmp_header.compression);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_ulong_into_buffer(buffer,0,bmp_header.sizeofbitmap);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_ulong_into_buffer(buffer,0,bmp_header.horzres);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_ulong_into_buffer(buffer,0,bmp_header.vertres);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_ulong_into_buffer(buffer,0,bmp_header.colorsused);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
 
         insert_ulong_into_buffer(buffer,0,bmp_header.colorsimp);
-        fwrite(buffer,1,4,fp);
+        fwrite(buffer,sizeof(char),4,fp);
     }
-
     printf("Cabecalho escrito\n");
-
-    pad = calculate_pad(width);
     printf("Pad: %d\n",pad);
-
     for(y = height-1;y > -1;y--)
     {
         for(x = 0;x < width; x++)
@@ -393,16 +401,12 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
             insert_long_into_buffer(buffer,0,imagem[position].red);
             fwrite(buffer,sizeof(char),1,fp);
         }
-        fwrite(buffer,sizeof(char),pad,fp);
         if(pad > 0)
         {
-            buffer[0] = 0; buffer[1] = 0; buffer[2] = 0;
             fwrite(buffer,sizeof(char),pad,fp);
         }
     }
-
+    printf("y = %d x = %d\n",y,x);
     fclose(fp);
-
     return 0;
-
 }

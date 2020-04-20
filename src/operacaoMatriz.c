@@ -3,41 +3,38 @@
 void testeMatriz()
 {
     Matriz matA, matB, matC;
-    matA.row = 2; matA.column = 3;
-    matB.row = 3; matB.column = 2;
-    matC.row = 3; matC.column = 3;
     printf("Create Matriz\n");
-    matA = create_matriz(2,3);
-    matB = create_matriz(3,2);
-    matC = create_matriz(3,3);
-    printf("Preencher matriz\n");
-    matA.mat[0] = 2; matA.mat[1] = 1;
-    matA.mat[2] = 2; matA.mat[3] = 1;
-    matA.mat[4] = 2; matA.mat[5] = 1;
+    matA = create_matriz(3,2);
+    printf("Preencher matriz [%d][%d]\n",matA.row,matA.column);
+    for (int pos = 0;pos < 6;pos++)
+    {matA.mat[pos] = pos;}
     matB = transposed(matA);
-    printf("Multiplicar Matriz\n");
+    printf("Multiplicar Matriz\nMatA ");
     printMatriz(matA);
+    printf("MatB ");
     printMatriz(matB);
     matC = multiplyMatriz(matA, matB);
+    printf("Multiplicacao ");
     printMatriz(matC);
     matC = hadamart(matC,matC);
+    printf("Hadamart ");
     printMatriz(matC);
     matA = multConst(matC,2);
+    printf("Multiplicacao constante ");
     printMatriz(matC);
 }
 
 void printMatriz(Matriz mat)
 {
     printf("Matriz: [%d][%d]\n",mat.row,mat.column);
-    for (int y = 0;y < mat.row;y++)
+    for (int position = 0;position < mat.row * mat.column;position++)
     {
-        for(int x = 0; x < mat.column; x++)
-        {
-            printf("  ");
-            printf("[%d][%d] : ", y, x);
-            printf("%d",mat.mat[y*mat.column + x]);
-        }
-        printf("\n");
+        int x = position % mat.column;
+        int y = position / mat.column;
+        if(x == 0 && y != 0){printf("\n");}
+        printf("  ");
+        printf("[%d][%d] : [%d] ", y, x, position);
+        printf("%d",mat.mat[position]);
     }
     printf("\n");
 }
@@ -72,24 +69,23 @@ Matriz somaMatrizes(Matriz a,Matriz b)
 
 Matriz transposed(Matriz mat)
 {
-    int row = 0, column = 0;
-    Matriz result;
-    result = create_matriz(mat.column,mat.row);
-    for(row = 0;row < mat.row;row++)
+    Matriz res;
+    res = create_matriz(mat.column,mat.row);
+    printf("res = [%d][%d]",res.row,res.column);
+    for(int pos = 0;pos < res.row * res.column;pos++)
     {
-        for(column = 0;column < mat.column;column++)
-        {
-            mat.mat[column*mat.row + row] = mat.mat[row*mat.column + column];
-        }
+        int row      = pos / res.column;
+        int column   = pos % res.column;
+        res.mat[pos] = mat.mat[column*mat.column + row];
     }
-    return mat;
+    return res;
 }
 
 Matriz multiplyMatriz(Matriz first,Matriz second)
 {
     int row = 0, column = 0, i = 0, sum = 0;
     Matriz result;
-    result = create_matriz(first.row,first.column);
+    result = create_matriz(first.row,second.column);
     if(first.column != second.row)
     {
         printf("MatA com colunas diferentes de MatB");
@@ -113,12 +109,12 @@ Matriz multiplyMatriz(Matriz first,Matriz second)
     return result;
 }
 
-Matriz create_matriz(int height,int width)
+Matriz create_matriz(int row,int column)
 {
     Matriz matrix;
-    matrix.column = width;
-    matrix.row = height;
-    matrix.mat = (int *) malloc(height*width*sizeof(int));
+    matrix.column = column;
+    matrix.row    = row;
+    matrix.mat    = (int *) malloc(column * row * sizeof(int));
     if(matrix.mat == NULL)
     {
         printf("Socorro o malloc retornou NULL\n");
@@ -129,11 +125,20 @@ Matriz create_matriz(int height,int width)
 
 Matriz hadamart(Matriz erro,Matriz dS)
 {
-    for (int pos = 0;pos < dS.column*dS.row;pos++)
+    if(erro.row == dS.row && erro.column == erro.column)
     {
-        erro.mat[pos] = erro.mat[pos] * dS.mat[pos];
+        for (int pos = 0;pos < dS.column*dS.row;pos++)
+        {
+            erro.mat[pos] = erro.mat[pos] * dS.mat[pos];
+        }
+        return erro;
+    } else {
+        printf("Matrizes de dimensões distintas\nErro");
+        printMatriz(erro);
+        printf("Ds ");
+        printMatriz(dS);
+        exit(EXIT_FAILURE);
     }
-    return erro;
 }
 
 Matriz multConst(Matriz mat,int constant)

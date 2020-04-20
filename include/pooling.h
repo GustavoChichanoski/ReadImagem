@@ -9,4 +9,4 @@ pixel  maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual);
 pixel  medPooling(pixel *matriz,int ordemMatriz);
 int    calcHeight(int length,int width);
 pixel *matrizPooling(pixel *imagem,pixel *matriz,int height,int width,int y,int x,int ordem);
-pixel *pooling(int stride,int width,int height,pixel *imagem);
+pxMat  pooling(int stride,pxMat imagem);

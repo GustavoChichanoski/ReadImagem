@@ -1,144 +1,146 @@
 #include "../include/cnn.h"
 
 #define RELU   0
-#define STRIDE 2
+#define STRIDE 1
 
-unsigned long kernel_Image[25] = {1,1,1,0,0, 0,1,1,1,0, 0,0,1,1,1, 0,0,1,1,0, 0,1,1,0,0};
-unsigned long resultado[9]     = {4,3,4,2,4,3,2,3,4};
-
-void   imprimeMatriz(Size mat,pixel *matriz);
+void   imprimeMatriz(pxMat matriz);
+Size   createSize(int row,int column);
 void   testeConvolucao();
+int    sqr(int a);
+void   swap(int *x,int *y);
+pixel *setup_kernel(pxMat kernel);
 
-pixel *convolucao
-(
-    long img_width,long img_height,pixel *image,int stride,
-    int kernel_degree,pixel *kernel
-);
+pxMat convolucao(pxMat image,pxMat kernel,int stride);
+
+int   sqr(int a)
+{
+    return a*a;
+}
 
 void testeConvolucao()
 {
-    printf("Teste Convoluacao:\n");
-    int teste[9]   = {1,0,1, 0,1,0, 1,0,1};
-    int conv[25]   = {1,1,1,0,0, 0,1,1,1,0, 0,0,1,1,1, 0,0,1,1,0, 0,1,1,0,0};
+    printf("Teste Convolucao:\n");
+    int teste[9]   = {0,0,0, 0,255,0, 0,0,0};
+    int conv[30]   = {1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5, 1,2,3,4,5};
     int result[25] = {2,2,3,1,1, 1,4,3,4,1, 1,2,4,3,3, 1,2,3,4,1, 0,2,2,1,1};
-    pixel *kernel, *imagem, *out;
-
-    imagem = allocate_image_array(5,5);
-    kernel = allocate_image_array(3,3);
-    out    = allocate_image_array(5,5);
-    
-    for(int position = 0;position < 25;position++)
+    int position   = 0;
+    pxMat kernel, imagem, out;
+    kernel.column = 3;
+    kernel.row    = 3;
+    imagem.column = 5;
+    imagem.row    = 5;
+    imagem.image  = allocate_image_array(6,5);
+    kernel.image  = allocate_image_array(3,3);
+    out.image     = allocate_image_array(6,5);
+    for(position  = 0;position < 25;position++)
     {
         if(position < 9)
         {
-            kernel[position] = igualarCorPixel(teste[position]);
+            kernel.image[position] = igualarCorPixel(teste[position]);
         }
-        imagem[position] = igualarCorPixel(conv[position]);
+        imagem.image[position] = igualarCorPixel(conv[position]);
     }
-    
-    out = convolucao(5,5,imagem,STRIDE,3,kernel);
-    Size out_size;
-    out_size.column = 5;
-    out_size.row = 5;
-    printf("Matriz Saida:\n");
-    imprimeMatriz(out_size,out);
+    out = convolucao(imagem,kernel,STRIDE);
+    printf("Matriz teste:\n");
+    imprimeMatriz(imagem);
+    printf("\nMatriz kernel:\n");
+    imprimeMatriz(kernel);
+    printf("\nMatriz Saida:\n");
+    imprimeMatriz(out);
+    kernel = pooling(2,out);
+    printf("\n");
+    printf("\nMatriz Pooling:\n");
+    imprimeMatriz(kernel);
+    printf("\n");
 }
 
-void imprimeMatriz(Size mat,pixel *matriz)
+void imprimeMatriz(pxMat mat)
 {
     for(int position = 0;position < mat.column*mat.row;position++)
     {
-        int pos_x = position % mat.column;
         int pos_y = position / mat.row;
+        int pos_x = position % mat.column;
         if(pos_x == 0 && pos_y != 0)
         {
             printf("\n");
         }
-        printf("\t[%d][%d] : %d",pos_y,pos_x,matriz[position].red);
+        printf("\t%d",mat.image[position]);
     }
 }
 
-pixel *fill_matriz(pixel *a,int b[], int length)
+pixel *fill_matriz(pxMat a,int b[])
 {
-    for(int position = 0;position < length;position++)
+    for(int position = 0;position < a.row * a.column;position++)
     {
-        a[position] = igualarCorPixel(b[position]);
+        a.image[position] = igualarCorPixel(b[position]);
     }
 }
 
-pixel *setup_kernel(pixel *kernel,int max_position)
+pxMat cnn(pxMat img,int kernel_degree)
 {
-    for(int position = 0;position < max_position;position++)
+    pxMat kernel;
+    int position;
+    int teste[9]  = {-1,-2,-1, 0,0,0, 1,2,1};
+    kernel.column = 3;
+    kernel.row    = 3;
+    kernel.image  = allocate_image_array(3,3);
+    kernel.image  = setup_kernel(kernel);
+    for(position  = 0;position < 9;position++)
     {
-        kernel[position] = igualarCorPixel(random_number(0,255));
+        kernel.image[position] = igualarCorPixel(teste[position]);
     }
-    return kernel;
+    img = convolucao(img,kernel,1);
+    // img = pooling(2,img);
+    return img;
 }
 
-int validZone(int pos_x,int pos_y,int *size)
+pixel *setup_kernel(pxMat kernel)
 {
-    int out = ((-1 < pos_x && -1 < pos_y) && (pos_x < size[0] && pos_y < size[1])) ? 1 : 0;
-    return out;
+    for(int position = 0;position < sqr(kernel.row);position++)
+    {
+        kernel.image[position] = igualarCorPixel(random_number(0,255));
+    }
+    return kernel.image;
 }
 
-pixel *convolucao
-(
-    long img_width,long img_height,pixel *image,int stride,
-    int kernel_degree,pixel *kernel
-)
+int validZone(int pos_x,int pos_y,pxMat img)
 {
-    int padding, size[2],img_size[2];
-    int img_pos_max, img_pos,img_pos_y,img_pos_x;
+    return ((-1 < pos_x && -1 < pos_y) && (pos_x < img.column && pos_y < img.row)) ? 1 : 0;
+}
+
+pxMat convolucao(pxMat img,pxMat kernel,int stride)
+{
+    int padding;
+    int img_pos_max, out_pos,out_pos_y,out_pos_x;
     int kernel_pos_max, kernel_pos, kernel_pos_x, kernel_pos_y;
-    int position_x, position_y, position;
-    pixel *saida;
-    
-    // padding = (img_width - 1) / 2;
-    img_size[0] = img_width;
-    img_size[1] = img_height;
-    size[0] = (img_width  / stride);
-    size[1] = (img_height / stride);
-    saida   = allocate_image_array(size[1],size[0]);
-    img_pos_max    = img_width*img_height;
-    kernel_pos_max = kernel_degree*kernel_degree;
-    img_pos = 0;
-
-    while (img_pos < img_pos_max)
+    int position, position_x, position_y;
+    pxMat saida;
+    pixel aux;
+    saida.column    = (img.column / stride); 
+    saida.row       = (img.row    / stride);
+    saida.image    = allocate_image_array(saida.row,saida.column);
+    img_pos_max    = saida.row * saida.column;
+    kernel_pos_max = sqr(kernel.row);
+    out_pos        = 0;
+    while (out_pos < img_pos_max)
     {
-        saida[img_pos] = igualarCorPixel(0);
-        img_pos_y = img_pos / img_width;
-        img_pos_x = img_pos % img_width;
-        kernel_pos = 0;
-        while(kernel_pos < kernel_pos_max)
+        saida.image[out_pos] = igualarCorPixel(0);
+        out_pos_y      = out_pos / img.column;
+        out_pos_x      = out_pos % img.row;
+        for(kernel_pos = 0;kernel_pos < kernel_pos_max;kernel_pos++)
         {
-            kernel_pos_x = kernel_pos / kernel_degree;
-            kernel_pos_y = kernel_pos % kernel_degree;
-            printf("img_pos_max : %d - ",img_pos);
-            printf("[%d]",img_pos_y);
-            printf("[%d]\t",img_pos_x);
-            printf("kernel_pos : %d",kernel_pos);
-            printf(" [%d][%d]\t",kernel_pos_x,kernel_pos_y);
-            printf("kernel_pos_max : %d \t",kernel_pos_max);
-            printf("kernel_degree : %d\t",kernel_degree);
-            position_x   = img_pos_x + kernel_pos_x - kernel_degree/2;
-            position_y   = img_pos_y + kernel_pos_y - kernel_degree/2;
-            position       = position_y*img_size[0] + position_x;
-            if(validZone(position_x,position_y,img_size))
+            kernel_pos_y = kernel_pos / kernel.row;
+            kernel_pos_x = kernel_pos % kernel.row;
+            position_y   = out_pos_y  + kernel_pos_y - kernel.row / 2;
+            position_x   = out_pos_x  + kernel_pos_x - kernel.row / 2;
+            position     = position_y * img.column   + position_x;
+            if(validZone(position_x,position_y,img))
             {
-                printf("position : %d\t",position);
-                printf("[%d]",position_y);
-                printf("[%d]\t",position_x);
-                saida[img_pos] = somaPixel(saida[img_pos],multiPixel(kernel[kernel_pos],image[position]));
+                aux            = multiPixel(kernel.image[kernel_pos],img.image[position]);
+                saida.image[out_pos] = somaPixel(saida.image[out_pos],divPixelporCnt(aux,255));
             }
-            kernel_pos = kernel_pos+stride;
-            printf("\n");
         }
-        if(img_pos + stride < img_width)
-        {
-            img_pos++;
-        } else {
-            img_pos = img_pos + stride;
-        }
+        out_pos = out_pos + stride;
     }
     return saida;
 }
@@ -154,4 +156,11 @@ pixel reluPixel(pixel data)
     data.blue  = (data.blue  < 0) ? 0 : data.blue;
     data.green = (data.green < 0) ? 0 : data.green;
     return data;
+}
+
+void swap(int *x,int *y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
 }

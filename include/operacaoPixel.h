@@ -27,6 +27,7 @@
     pixel *allocate_image_array(long width,long height);
     pixel  multiMatrizPixel(pixel imagem,pixel filtro,int ordemMatriz);
     pixel  multiPixel(pixel a,pixel b);
+    pxMat  rotate_90_rigth(pxMat img);
     
     #ifdef __cplusplus
         }
