@@ -20,6 +20,17 @@
         extern "C" {
     #endif
     
+    struct cnnLayer
+    {
+        pxMat           *kernel;
+        pxMat            input;
+        pxMat           *output;
+        struct cnnLayer *next;
+        struct cnnLayer *prev;
+    };
+    
+    typedef struct cnnLayer CNNLayer;
+    
     typedef struct size
     {
         int row, column;
@@ -31,6 +42,8 @@
     void   swap(int *x,int *y);
     pixel *setup_kernel(pxMat kernel);
     pxMat  cnn(pxMat img,int kernel_degree);
+    pixel  reluPixel(pixel data);
+    
     #ifdef __cplusplus
         extern "C" }
     #endif

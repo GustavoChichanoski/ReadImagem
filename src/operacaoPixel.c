@@ -185,7 +185,7 @@ pixel multiPixel(pixel a,pixel b)
 {
     a.blue  *= b.blue;
     a.green *= b.green;
-    a.green *= b.red;
+    a.red   *= b.red;
     return a;
 }
 

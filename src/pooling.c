@@ -1,14 +1,7 @@
 #include "../include/pooling.h"
 
-int padWidth, padHeight;
-
 pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual);
-
-void calcPad(int poolingOrdem,int height, int width)
-{
-    padWidth  = width  % poolingOrdem;
-    padHeight = height % poolingOrdem;
-}
+pixel medPixel(pixel MaximoAnterior, pixel ImagemAtual);
 
 pixel maxPooling(pixel *matriz,int ordemMatriz)
 {
@@ -95,38 +88,39 @@ pixel *matrizPooling(imagem,matriz,height,width,y,x,ordem)
     image  : RGB of image
     stride : how big are the steps of the filter
 */
-pxMat pooling(int stride,pxMat img)
+pxMat pooling(int stride,pxMat *img)
 {
     pxMat saida;
     pixel max_valor;
-    int column = 0;
-    column = img.column / stride + 1;
-    // column = img.column / stride + (stride - img.column % stride);
-    // column = (img.column / stride);
-    int row = 0;
-    // row = img.row / stride + (stride - img.row % stride);
-    row = img.row / stride + 1;
-    // row = (img.row / stride);
-    int pos_x = 0, pos_y = 0, i = 0, j = 0, position = 0;
-    saida = createPixelMatriz(row,column);
-    for (pos_y = 0; pos_y < img.row; pos_y = pos_y + stride)
-    {
-        for (pos_x = 0; pos_x < img.column;pos_x = pos_x + stride)
-        {
-            max_valor = img.image[pos_y*img.column + pos_x];
-            for (i = pos_x;i < pos_x + stride && i < img.column;i++)
-            {
-                for (j = pos_y; j < pos_y + stride && j < img.row; j++)
-                {
-                    max_valor = maxValorPixel(max_valor,img.image[j*img.column + i]);
-                }
-            }
-            saida.image[position] = max_valor;
-            position++;
-        }
-    }
+    int column = 0, row = 0;
+    int pos_x = 0, pos_y = 0, i = 0, j = 0, out_x = 0, out_y = 0;
+    // column = img -> column / stride + 1;
+    column = (img -> column / stride);
+    // column = ((img -> column) / stride) + (stride - img -> column % stride);
+    // row    = ((img -> row) / stride) + (stride - img -> row % stride);
+    row = img -> row / stride + 1;
+    // row = (img -> row / stride);
     saida.row = row;
     saida.column = column;
+    saida.image = allocate_image_array(row,column);
+    for (pos_y = 0; pos_y < img -> row; pos_y = pos_y + stride)
+    {
+        for (pos_x = 0; pos_x < img -> column;pos_x = pos_x + stride)
+        {
+            max_valor = img -> image[pos_y*img -> column + pos_x];
+            for (i = pos_x; i < pos_x + stride && i < img -> column;i++)
+            {
+                for (j = pos_y;j < pos_y + stride && j < img -> row; j++)
+                {
+                    max_valor = maxValorPixel(max_valor,img -> image[j*img -> column + i]);
+                }
+            }
+            saida.image[out_y*column + out_x] = max_valor;
+            out_x++;
+        }
+        out_x = 0;
+        out_y++;
+    }
     return saida;
 }
 
@@ -135,5 +129,13 @@ pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual)
     MaximoAnterior.blue  = (MaximoAnterior.blue  < ImagemAtual.blue ) ? ImagemAtual.blue  : MaximoAnterior.blue;
     MaximoAnterior.red   = (MaximoAnterior.red   < ImagemAtual.red  ) ? ImagemAtual.red   : MaximoAnterior.red;
     MaximoAnterior.green = (MaximoAnterior.green < ImagemAtual.green) ? ImagemAtual.green : MaximoAnterior.green;
+    return MaximoAnterior;
+}
+
+pixel medPixel(pixel MaximoAnterior, pixel ImagemAtual)
+{
+    MaximoAnterior.blue  = (MaximoAnterior.blue  + ImagemAtual.blue ) / 2;
+    MaximoAnterior.red   = (MaximoAnterior.red   + ImagemAtual.red  ) / 2;
+    MaximoAnterior.green = (MaximoAnterior.green + ImagemAtual.green) / 2;
     return MaximoAnterior;
 }

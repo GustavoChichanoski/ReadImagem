@@ -13,7 +13,7 @@ pixel *read_bmp_image(char *file_name,pixel *array,bmpfileheader file_header,bit
 int    calculate_pad(long width);
 int    is_a_bmp(char *file_name);
 int    does_not_exist(char file_name[]);
-int    write_bmp(char *file_name,bmpfileheader file_header,bitmapheader bmp_header,pixel *imagem);
+int    write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel *imagem);
 int    free_image_array(pixel *the_array,long width,long height);
 
 int calculate_pad(long width);
@@ -210,31 +210,18 @@ pixel *read_bmp_image(file_name,array,file_header,bmheader)
     bmpfileheader file_header;
     bitmapheader bmheader;
 {
-    
-    printf("Read bmp image\n");
-    
     FILE *fp;
     int x, y, pad = 0, place = 0, i;
     long colors = 0, height = 0, width = 0, position = 0;
     char buffer[10];
     unsigned char uc;
     long ll;
-
     width = bmheader.width;
     height = bmheader.height;
-
-    if(height < 0)
-        height *= (-1);
-
-    if(bmheader.compression)
-        exit(1);
-
-    printf("Read bmp pixel\n");
-
+    if(height < 0){height *= (-1);}
+    if(bmheader.compression){exit(1);}
     array = read_color_table(file_name,height,width,array);
-
     return array;
-
 }
 
 /* calculte_pad(...)                                         *
@@ -243,7 +230,7 @@ pixel *read_bmp_image(file_name,array,file_header,bmheader)
  * o números de bytes adicionados para completar essa regra  */
 int calculate_pad(long width)
 {
-    return ((width % 4) == 0) ? 0 : (4 - (width % 4));
+    return ((width % 4) == 0) ? 0 : (width % 4);
 }
 
 /* is_a_bmp(...)                                                *
@@ -252,35 +239,28 @@ int calculate_pad(long width)
  * to ensure it is 0x4d42                                       */
 int is_a_bmp(char *file_name)
 {
-
     char *cc;
     bmpfileheader file_header;
-
     cc = strstr(file_name,".bmp");
-    if(cc == NULL){
+    if(cc == NULL)
+    {
         return 0;
     }
-
     read_bmp_file_header(file_name,&file_header);
-
     return (file_header.filetype != 0x4D42) ? 0 : 1;
-
 }
 
 /* does_not_exist(...)
  * Verifica se o arquivo existe */
-int does_not_exist(char file_name[]){
-
+int does_not_exist(char file_name[])
+{
     FILE *image_file;
-
     image_file = fopen(file_name,"rb");
     if(image_file != NULL){
         fclose(image_file);
         return 0;
     }
-
     return 1;
-
 }
 
 /* Funcao que libera a memoria utilizada no armazenamento *
@@ -305,17 +285,21 @@ pxMat createPixelMatriz(int row,int column)
 
 unsigned long calcSize(int width,int height,int offset,int pad)
 {
-    // return offset + (width + calculate_pad(width)) * height * 3;
     return offset + height * (width * 3 + pad);
 }
 
+unsigned long sizebmp(int width,int height)
+{
+    return 3*width*height;
+}
+
+/*
 int write_bmp(file_name,file_header,bmp_header,imagem)
     char          *file_name;
     bmpfileheader  file_header;
     bitmapheader   bmp_header;
     pixel         *imagem;
 {
-
     char buffer[10];
     long ll;
     short ss;
@@ -356,34 +340,24 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
     {
         insert_ulong_into_buffer(buffer,0,bmp_header.size);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_long_into_buffer(buffer,0,bmp_header.width);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_long_into_buffer(buffer,0,bmp_header.height);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_short_into_buffer(buffer,0,bmp_header.planes);
         fwrite(buffer,sizeof(char),2,fp);
-
         insert_short_into_buffer(buffer,0,bmp_header.bitsperpixel);
         fwrite(buffer,sizeof(char),2,fp);
-
         insert_ulong_into_buffer(buffer,0,bmp_header.compression);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_ulong_into_buffer(buffer,0,bmp_header.sizeofbitmap);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_ulong_into_buffer(buffer,0,bmp_header.horzres);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_ulong_into_buffer(buffer,0,bmp_header.vertres);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_ulong_into_buffer(buffer,0,bmp_header.colorsused);
         fwrite(buffer,sizeof(char),4,fp);
-
         insert_ulong_into_buffer(buffer,0,bmp_header.colorsimp);
         fwrite(buffer,sizeof(char),4,fp);
     }
@@ -407,6 +381,79 @@ int write_bmp(file_name,file_header,bmp_header,imagem)
         }
     }
     printf("y = %d x = %d\n",y,x);
+    fclose(fp);
+    return 0;
+}
+*/
+
+int write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel *imagem)
+{
+    char buffer[10] = {0,0,0,0,0,0,0,0,0,0};
+    long ll;
+    short ss;
+    unsigned short uss;
+    unsigned long ull;
+    FILE *fp;
+    int x = 0, y = 0, pad = 0, position = 0;
+    int width  = bmp_header -> width;
+    int height = bmp_header -> height;
+    pad = calculate_pad(width);
+    file_header -> filesize = calcSize(bmp_header -> width,bmp_header -> height,file_header -> offset,pad);
+    bmp_header -> sizeofbitmap = sizebmp(bmp_header -> width,bmp_header -> height);
+    fp = fopen(file_name,"wb");
+    {
+        insert_ushort_into_buffer(buffer,0,file_header -> filetype);
+        fwrite(buffer,sizeof(char),2,fp);
+        insert_ulong_into_buffer (buffer,0,file_header -> filesize);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_short_into_buffer (buffer,0,file_header -> reserved1);
+        fwrite(buffer,sizeof(char),2,fp);
+        insert_short_into_buffer (buffer,0,file_header -> reserved2);
+        fwrite(buffer,sizeof(char),2,fp);
+        insert_ulong_into_buffer (buffer,0,file_header -> offset);
+        fwrite(buffer,sizeof(char),4,fp);
+    }
+    {
+        insert_ulong_into_buffer(buffer,0,bmp_header -> size);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_long_into_buffer (buffer,0,bmp_header -> width);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_long_into_buffer (buffer,0,bmp_header -> height);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_short_into_buffer(buffer,0,bmp_header -> planes);
+        fwrite(buffer,sizeof(char),2,fp);
+        insert_short_into_buffer(buffer,0,bmp_header -> bitsperpixel);
+        fwrite(buffer,sizeof(char),2,fp);
+        insert_ulong_into_buffer(buffer,0,bmp_header -> compression);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_ulong_into_buffer(buffer,0,sizebmp(width,height));
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_ulong_into_buffer(buffer,0,bmp_header -> horzres);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_ulong_into_buffer(buffer,0,bmp_header -> vertres);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_ulong_into_buffer(buffer,0,bmp_header -> colorsused);
+        fwrite(buffer,sizeof(char),4,fp);
+        insert_ulong_into_buffer(buffer,0,bmp_header -> colorsimp);
+        fwrite(buffer,sizeof(char),4,fp);
+    }
+    for(y = height-1;y > -1;y--)
+    {
+        for(x = 0;x < width; x++)
+        {
+            position = y*width + x;
+            insert_long_into_buffer(buffer,0,imagem[position].blue);
+            fwrite(buffer,sizeof(char),1,fp);
+            insert_long_into_buffer(buffer,0,imagem[position].green);
+            fwrite(buffer,sizeof(char),1,fp);
+            insert_long_into_buffer(buffer,0,imagem[position].red);
+            fwrite(buffer,sizeof(char),1,fp);
+        }
+        if(pad > 0)
+        {
+            fwrite(buffer,sizeof(char),pad,fp);
+        }
+    }
     fclose(fp);
     return 0;
 }

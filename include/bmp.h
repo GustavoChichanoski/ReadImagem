@@ -5,7 +5,6 @@
  * Author: Gustavo
  * Library for read bmp files
  * Created on 2 de Agosto de 2019, 14:14 */
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -148,9 +147,9 @@ typedef struct {
  * unsigned long blue[4]
  * unsigned long green[4] */
 typedef struct {
-    long blue;
-    long green;
-    long red;
+    int blue;
+    int green;
+    int red;
 } pixel; /* pixel */
 
 typedef struct pxmat
@@ -160,15 +159,27 @@ typedef struct pxmat
     int column;
 } pxMat;
 
-pxMat createPixelMatriz(int row,int column);
+typedef struct 
+{
+    int real, imag;
+} complex;
+
+pxMat  createPixelMatriz(int row,int column);
 int    read_bmp_header(char *file_name,bitmapheader *bmp_header);
 int    read_bmp_file_header(char *file_name,bmpfileheader *file_header);
 pixel *read_bmp_image(char *file_name,pixel *array,bmpfileheader file_header,bitmapheader bmheader);
 int    calculate_pad(long width);
 int    is_a_bmp(char *file_name);
 int    does_not_exist(char file_name[]);
-int    write_bmp(char *file_name,bmpfileheader file_header,bitmapheader bmp_header,pixel *imagem);
+int    write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel *imagem);
 int    free_image_array(pixel *the_array,long width,long height);
+
+// pwd(int a,int b)
+// {
+//     register int t = 1;
+//     for(;b;b--) t = t*a;
+//     return t;
+// }
 
 #ifdef __cplusplus
     }

@@ -1,8 +1,8 @@
 #include "../include/neuralNetwork.h"
 
-#define MIN        0
 #define MED        127
-#define MAX        255 /* DEFAULT */
+#define MIN        -255 /* DEFAULT */
+#define MAX        255  /* DEFAULT */
 #define BIAS       1
 #define LEARN_RATE 100
 
@@ -11,6 +11,19 @@ pixel  rootMeanSquare(pixel *error,int neurons);
 int    floorSqrt(int erro);
 Matriz calcErro(Matriz real,int *setpoint);
 Matriz setup_weight(Matriz weigths);
+int    removeLayer(Layer *l,int index);
+
+void fillPesos(Layer *l)
+{
+    Layer *p;
+    for (p = l;p != NULL;p = p -> next)
+    {
+        for (int i = 0;i < l -> height * l -> width;i++)
+        {
+            p -> weight.mat[i] = random_number(MIN,MAX);
+        }
+    }
+}
 
 Matriz calcErro(Matriz real,int *setpoint)
 {
@@ -26,6 +39,17 @@ Matriz setup_weight(Matriz weigths)
     for (int i = 0;i < weigths.row * weigths.column;i++)
     {
         weigths.mat[i] = random_number(-255,256);
+    }
+    return weigths;
+}
+
+pxMat setupKernel(pxMat weigths)
+{
+    for (int i = 0;i < weigths.row * weigths.column;i++)
+    {
+        weigths.image[i].red   = random_number(-255,256);
+        weigths.image[i].blue  = random_number(-255,256);
+        weigths.image[i].green = random_number(-255,256);
     }
     return weigths;
 }
@@ -88,4 +112,103 @@ int floorSqrt(int erro)
         }
     }
     return ans;
+}
+
+Layer *init(void)
+{
+    return NULL;
+}
+
+Layer *insertHead(Layer *l,int input,int output)
+{
+    Layer  *novo          = (Layer *) malloc(sizeof(Layer));
+    novo -> weight.mat    = (int *) malloc(input * output * sizeof(int));
+    novo -> weight.column = input;
+    novo -> weight.row    = output;
+    novo -> weight        = setup_weight(novo -> weight);
+    novo -> next          = l;
+    return novo;
+}
+
+void imprime(Layer *l)
+{
+    Layer *p;
+    for (p = l;p != NULL;p = p -> next)
+    {
+        for(int i = 0;i < p -> height;i++)
+        {
+            for(int j = 0;j < p -> width;j++)
+            {
+                if(j == 0 && i != 0)
+                {
+                    printf("\n");
+                }
+                printf("%d\t",p -> weight.mat[i * p -> width + j]);
+            }
+        }
+    }
+}
+
+Layer *add(int kernel,pxMat input,Layer layer)
+{
+    
+}
+
+Layer *convLayer(int kernel,pxMat imagem,int filter)
+{
+    for (int i = 0;i < filter;i++)
+    {
+        
+    }
+}
+
+int empty(Layer *l)
+{
+    return (l == NULL) ? 1 : 0;
+}
+
+int removeLayer(Layer *l,int index)
+{
+    Layer *ant = NULL;
+    Layer *p = l;
+    int id = 0;
+    while(p != NULL && id != index)
+    {
+        ant = p;
+        p = p -> next;
+    }
+    if(p == NULL)
+    {
+        return 1; /* Não achou */
+    }
+    if(ant == NULL)
+    {
+        l = p -> next;
+    }
+    else
+    {
+        ant -> next = p -> next;
+    }
+    free(p);
+    return l;
+}
+
+int *calcCamada(int *input,Layer *l)
+{
+    Layer *p;
+    for (p = l;p != NULL;p = p -> next)
+    {
+        p -> output = multiplyMatriz(l -> weight,l -> input);
+    }
+}
+
+void freeCamada(Layer *l)
+{
+    Layer *p = l;
+    while(p != NULL)
+    {
+        Layer *t = p -> next;
+        free(p);
+        p = t;
+    }
 }

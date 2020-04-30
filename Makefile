@@ -1,7 +1,7 @@
 .PHONY: all clean
 
 CC = gcc
-C_FLAGS = -I./include -O2 -g3
+C_FLAGS = -I./include -O0 -g3
 SRC = $(wildcard *.c)
 OBJ := $(patsubst %.c,%.o,$(wildcard *.c))
 
@@ -10,14 +10,17 @@ all: build/ read_image
 foo: $(OBJ)
 	cc -o foo $(C_FLAGS) $(OBJ)
 
-read_image: src/main.c build/bmp.o build/conversao.o build/detectores.o build/operacaoPixel.o build/matriz.o build/cnn.o build/pooling.o build/neuralNetwork.o
-	${CC} ${C_FLAGS} src/main.c build/operacaoPixel.o build/detectores.o build/bmp.o build/matriz.o build/pooling.o build/conversao.o build/cnn.o build/neuralNetwork.o -o read_image
+read_image: src/main.c build/bmp.o build/conversao.o build/detectores.o build/operacaoPixel.o build/matriz.o build/cnn.o build/pooling.o build/complex.o build/neuralNetwork.o
+	${CC} ${C_FLAGS} src/main.c build/operacaoPixel.o build/detectores.o build/bmp.o build/matriz.o build/pooling.o build/conversao.o build/cnn.o build/neuralNetwork.o build/complex.o -o read_image
 
 build/matriz.o: build/ src/operacaoMatriz.c
 	$(CC) ${C_FLAGS} -c src/operacaoMatriz.c -o build/matriz.o
 
 build/pooling.o: build/ src/pooling.c
 	$(CC) ${C_FLAGS} -c src/pooling.c -o build/pooling.o
+
+build/complex.o: build/ src/complex.c
+	$(CC) ${C_FLAGS} -c src/complex.c -o build/complex.o
 
 build/conversao.o: build/ src/conversao.c
 	${CC} ${C_FLAGS} -c src/conversao.c -o build/conversao.o
@@ -45,6 +48,5 @@ print: scr/*.c
 	touch print
 
 clean:
-	rmdir /Q /S build
-	del main.o
 	del *.exe
+	rmdir /Q /S build
