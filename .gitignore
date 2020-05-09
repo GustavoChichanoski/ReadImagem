@@ -47,17 +47,16 @@
 # Kernel Module Compile Results
 *.mod*
 *.cmd
+*.js
+*.json
+*.bmp
+*.jpg
 
 # Folders
 img
-*.js
-*.json
 
 .tmp_versions/
 modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-
-*.bmp
-*.jpg

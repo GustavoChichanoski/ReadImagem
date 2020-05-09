@@ -23,8 +23,9 @@
     struct cnnLayer
     {
         pxMat           *kernel;
-        pxMat            input;
+        pxMat           *input;
         pxMat           *output;
+        int              bias;
         struct cnnLayer *next;
         struct cnnLayer *prev;
     };
@@ -35,6 +36,8 @@
     {
         int row, column;
     } Size;
+    
+    void   convolucaoInt(int **img,int img_width,int img_height,int **kernel,int kernel_width,int kernel_height,int **out,int *out_width, int *out_heigth,int stride);
     void   imprimeMatriz(pxMat matriz);
     Size   createSize(int row,int column);
     void   testeConvolucao();

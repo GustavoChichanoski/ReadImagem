@@ -159,11 +159,6 @@ typedef struct pxmat
     int column;
 } pxMat;
 
-typedef struct 
-{
-    int real, imag;
-} complex;
-
 pxMat  createPixelMatriz(int row,int column);
 int    read_bmp_header(char *file_name,bitmapheader *bmp_header);
 int    read_bmp_file_header(char *file_name,bmpfileheader *file_header);
@@ -173,7 +168,8 @@ int    is_a_bmp(char *file_name);
 int    does_not_exist(char file_name[]);
 int    write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel *imagem);
 int    free_image_array(pixel *the_array,long width,long height);
-
+int    write_bmp_rgb(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,int **red,int **blue,int **green);
+void   read_bmp_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green);
 // pwd(int a,int b)
 // {
 //     register int t = 1;

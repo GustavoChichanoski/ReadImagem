@@ -5,12 +5,9 @@ pixel medPixel(pixel MaximoAnterior, pixel ImagemAtual);
 
 pixel maxPooling(pixel *matriz,int ordemMatriz)
 {
-    
     int length = ordemMatriz*ordemMatriz, i = 0;
     pixel max;
-    
     max = igualarCorPixel(0);
-    
     for(i = 0; i < length; i++)
     {
         if(matriz[i].blue > max.blue)
@@ -26,9 +23,21 @@ pixel maxPooling(pixel *matriz,int ordemMatriz)
             max.red   = matriz[i].red;
         }
     }
-    
     return max;
-    
+}
+
+int maxPoolingInt(int **matriz,int ordemMatriz)
+{
+    int length = ordemMatriz * ordemMatriz;
+    int max = 0;
+    for(int i = 0;i < length;i++)
+    {
+        if((*matriz)[i] > max)
+        {
+            max = (*matriz)[i];
+        }
+    }
+    return max;
 }
 
 pixel medPooling(pixel *matriz,int ordemMatriz)
@@ -122,6 +131,42 @@ pxMat pooling(int stride,pxMat *img)
         out_y++;
     }
     return saida;
+}
+
+/*
+    width  : number of column of image
+    height : number of row of image
+    image  : RGB of image
+    stride : how big are the steps of the filter
+*/
+void poolingInt(int stride,int **img,int img_width,int img_height,int **out,int *out_width,int *out_height)
+{
+    int max_valor;
+    int column = 0, row = 0;
+    int pos_x = 0, pos_y = 0, i = 0, j = 0, out_x = 0, out_y = 0;
+    column = (img_width / stride) + 1;
+    row    = (img_height / stride) + 1;
+    (*out_height) = row;
+    (*out_width)  = column;
+    (*out) = (int *) malloc(row * column * sizeof(int));
+    for (pos_y = 0; pos_y < img_height; pos_y = pos_y + stride)
+    {
+        for (pos_x = 0; pos_x < img_width;pos_x = pos_x + stride)
+        {
+            max_valor = (*img)[pos_y * img_width + pos_x];
+            for (i = pos_x; i < pos_x + stride && i < img_width;i++)
+            {
+                for (j = pos_y;j < pos_y + stride && j < img_height; j++)
+                {
+                    max_valor = (max_valor > (*img)[j * img_width + i]) ? max_valor : (*img)[j*img_width + i];
+                }
+            }
+            (*out)[out_y * column + out_x] = max_valor;
+            out_x++;
+        }
+        out_x = 0;
+        out_y++;
+    }
 }
 
 pixel maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual)

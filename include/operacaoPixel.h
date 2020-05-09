@@ -28,6 +28,8 @@
     pixel  multiMatrizPixel(pixel imagem,pixel filtro,int ordemMatriz);
     pixel  multiPixel(pixel a,pixel b);
     pxMat  rotate_90_rigth(pxMat img);
+    pixel  subAbsPixel(pixel a, pixel b);
+    pixel  subPixel(pixel a,pixel b);
     
     #ifdef __cplusplus
         }

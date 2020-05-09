@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include "../include/bmp.h"
+#include "../include/operacaoPixel.h"
 
 pixel *allocate_image_array(long width,long height);
 pixel  multPixelCnt(pixel entrada,int constante);
@@ -9,6 +10,7 @@ pixel  igualarCorPixel(int valor);
 pixel  divPixelCnt(pixel entrada,int constante);
 pixel  somaPixel(pixel a,pixel b);
 pixel  subAbsPixel(pixel a, pixel b);
+pixel  subPixel(pixel a,pixel b);
 long   somaCorPixel(pixel entrada);
 pixel  maiorCordoPixel(pixel entrada);
 pixel  multiPixel(pixel a,pixel b);
@@ -96,6 +98,24 @@ pixel somaPixel(pixel a,pixel b)
     a.green += b.green;
     /* Soma da cor vermelha e armazena no pixel1 */
     a.red   += b.red;
+    /* Retorna o pixel */
+    return a;
+}
+
+/* Subtrai as cores de dois pixeis                         *
+ * Entradas :                                              *
+ * pixel pixel1 - Primeiro pixel a ser somado              *
+ * pixel pixel2 - Segundo pixel a ser somado               *
+ * Saidas:                                                 *
+ * pixel resultado - resultado da subtração dos dois pixel */
+pixel subPixel(pixel a,pixel b)
+{
+    /* Soma da cor azul e armazena no pixel1 */
+    a.blue  -= b.blue;
+    /* Soma da cor verde e armazena no pixel1 */
+    a.green -= b.green;
+    /* Soma da cor vermelha e armazena no pixel1 */
+    a.red   -= b.red;
     /* Retorna o pixel */
     return a;
 }

@@ -78,11 +78,6 @@ pixel rootMeanSquare(pixel *error,int neurons)
     return sum;
 }
 
-int relu(int x)
-{
-    return (x < 0) ? 0 : x;
-}
-
 int derivadaRelu(int x)
 {
     return (x < 0) ? 0 : 1;
@@ -165,32 +160,6 @@ Layer *convLayer(int kernel,pxMat imagem,int filter)
 int empty(Layer *l)
 {
     return (l == NULL) ? 1 : 0;
-}
-
-int removeLayer(Layer *l,int index)
-{
-    Layer *ant = NULL;
-    Layer *p = l;
-    int id = 0;
-    while(p != NULL && id != index)
-    {
-        ant = p;
-        p = p -> next;
-    }
-    if(p == NULL)
-    {
-        return 1; /* Não achou */
-    }
-    if(ant == NULL)
-    {
-        l = p -> next;
-    }
-    else
-    {
-        ant -> next = p -> next;
-    }
-    free(p);
-    return l;
 }
 
 int *calcCamada(int *input,Layer *l)
