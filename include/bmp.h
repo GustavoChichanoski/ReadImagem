@@ -169,7 +169,7 @@ int    does_not_exist(char file_name[]);
 int    write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel *imagem);
 int    free_image_array(pixel *the_array,long width,long height);
 int    write_bmp_rgb(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,int **red,int **blue,int **green);
-void   read_bmp_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green);
+int    read_bmp_image_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green);
 // pwd(int a,int b)
 // {
 //     register int t = 1;

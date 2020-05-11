@@ -54,6 +54,7 @@
 
 # Folders
 img
+./.vscode
 
 .tmp_versions/
 modules.order
