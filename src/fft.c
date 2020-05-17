@@ -1,16 +1,6 @@
-#include <math.h>
 #include "../include/fft.h"
-#include "../include/complexo.h"
 
-#define A_360            4095
-#define SQRT_2           5793
-#define A_180            2047
-#define A_90             1023
-#define FORWARD          0
-#define MINIMUM_FFT_SIZE 8
-#define MAXIMUM_FFT_SIZE 1048576
-
-const int sin90[1023] =
+const int fpga_sin90[1023] =
 {
     0,6,13,19,25,31,38,44,50,57,63,69,75,82,88,94,100,107,
     113,119,126,132,138,144,151,157,163,170,176,182,188,195,
@@ -101,46 +91,52 @@ const int sin90[1023] =
     4087,4088,4088,4088,4089,4089,4089,4090,4090,4090,4091,
     4091,4091,4091,4092,4092,4092,4092,4093,4093,4093,4093,
     4093,4094,4094,4094,4094,4094,4094,4094,4095,4095,4095,
-    4095,4095,4095,4095,4095,4095,4095
+    4095,4095,4095,4095,4095,4095
 };
 
-int cos(int angle,int inverse)
+void fpga_FFT(int *inputR,int *inputI,int N,int type);
+int  fpga_cos(int angle,int inverse);
+int  fpga_sin(int angle,int inverse);
+int  fpga_log2(int n,int v);
+int  fpga_pwd2(int n,int v);
+int  fpga_valid_FFT_size(int N);
+void fpga_rearrange_input(int *InputR, int *InputI, int *BufferR, int *BufferI, int *RevBits, int N);
+void fpga_fill_Wn(int *TwiddleR, int *TwiddleI, int N, int type);
+int  fpga_required_FFT_size(int NumPts);
+void fpga_tranform(int *InputR, int *InputI, int *BufferR, int *BufferI, int *TwiddleR, int *TwiddleI, int N);
+
+int fpga_cos(int angle,int inverse)
 {
-    return sin(angle + A_90,inverse);
+    return fpga_sin(angle + A_90,inverse);
 }
 
-int sin(int angle,int inverse)
+int fpga_sin(int angle,int inverse)
 {
     angle /= A_360;
     if(angle > A_180)
     {
-        return sin(angle - A_180,(inverse == 1) ? 0 : 1);
+        return fpga_sin(angle - A_180,(inverse == 1) ? 0 : 1);
     } else {
         if(angle > A_90)
         {
-            return sin(angle - A_90,inverse);
+            return fpga_sin(angle - A_90,inverse);
         } else { 
-            return sin90[angle];
+            return fpga_sin90[angle];
         }
     }
 }
 
-int min(int a,int b)
-{
-    return (a < b) ? a : b;
-}
-
-int log2Int(int n,int v)
+int fpga_log2(int n,int v)
 {
     if(n > 1)
     {
-        return log2Int(n/2,v + 1);
+        return fpga_log2(n/2,v + 1);
     } else {
         return v;
     }
 }
 
-int pwd2(int n,int v)
+int fpga_pwd2(int n,int v)
 {
     if(n = 0)
     {
@@ -150,38 +146,38 @@ int pwd2(int n,int v)
         {
             return v;
         } else { 
-            return pwd2(n - 1,v * 2);
+            return fpga_pwd2(n - 1,v * 2);
         }
     }
 }
 
-int is_valid_FFT_size(int N)
+int fpga_valid_FFT_size(int N)
 {
     if(N < MINIMUM_FFT_SIZE || N > MAXIMUM_FFT_SIZE || (N & (N - 1) != 0))
     {
         return 0;
     }
-    return (log2Int(N,0) + 1);
+    return (fpga_log2(N,0) + 1);
 }
 
-void FFT(int *inputR,int *inputI,int N,int type)
+void fpga_FFT(int *inputR,int *inputI,int N,int type)
 {
     int *WnR, *WnI;
     int *bufferR, *bufferI; // Buffer
     int *revBits;
-    int j = 0, OneOverN, log2ofN = log2Int(N,0);
+    int j = 0, OneOverN, log2ofN = fpga_log2(N,0);
     // Verify the FFT size and type
-    if(!is_valid_FFT_size(N))
+    if(fpga_valid_FFT_size(N) == 0)
     {
         exit(EXIT_FAILURE);
         return;
     }
-    WnR     = malloc(N/2 * sizeof(int));
-    WnI     = malloc(N/2 * sizeof(int));
-    bufferR = malloc(  N * sizeof(int));
-    bufferI = malloc(  N * sizeof(int));
-    revBits = malloc(  N * sizeof(int));
-    if
+    { // Allocate memory space
+        WnR     = malloc(N/2 * sizeof(int)); WnI     = malloc(N/2 * sizeof(int));
+        bufferR = malloc(  N * sizeof(int)); bufferI = malloc(  N * sizeof(int));
+        revBits = malloc(  N * sizeof(int));
+    }
+    if // verify if malloc allocate memory
     (
         bufferI == NULL || bufferR == NULL || 
         WnR     == NULL || WnI     == NULL || 
@@ -192,9 +188,9 @@ void FFT(int *inputR,int *inputI,int N,int type)
         exit(EXIT_FAILURE);
         return;
     }
-    ReArrangeInput(inputR,inputI,bufferR,bufferI,revBits,N);
-    fillTwiddleArray(WnR,WnI,N,type);
-    transform(inputR,inputI,bufferR,bufferI,WnR,WnI,N);
+    fpga_rearrange_input(inputR,inputI,bufferR,bufferI,revBits,N);
+    fpga_fill_Wn(WnR,WnI,N,type);
+    fpga_tranform(inputR,inputI,bufferR,bufferI,WnR,WnI,N);
     if(log2ofN % 2 == 1)
     {
         for(j = 0;j < N;j++)
@@ -221,17 +217,15 @@ void FFT(int *inputR,int *inputI,int N,int type)
             }
         }
     }
-    free(bufferR);
-    free(bufferI);
-    free(WnR);
-    free(WnI);
+    free(bufferR); free(bufferI);
+    free(WnR);     free(WnI);
     free(revBits);
 }
 
 /* This puts the input arrays in bit reversed order.
 // The while loop generates an array of bit reversed numbers for butterfly. e.g.
 // N=8: 0,4,2,6,1,5,3,7  N=16: 0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15 */
-void ReArrangeInput(int *InputR, int *InputI, int *BufferR, int *BufferI, int *RevBits, int N)
+void fpga_rearrange_input(int *InputR, int *InputI, int *BufferR, int *BufferI, int *RevBits, int N)
 {
     int j, k, J, K;
     J = N/2;
@@ -247,7 +241,7 @@ void ReArrangeInput(int *InputR, int *InputI, int *BufferR, int *BufferI, int *R
         J /= 2;
     }
     // Move the rearranged input values to Buffer.
-    // Take note of the pointer swaps at the top of the transform algorithm.
+    // Take note of the pointer swaps at the top of the fpga_tranform algorithm.
     for(j=0; j<N; j++)
     {
         BufferR[j] = InputR[ RevBits[j] ];
@@ -256,12 +250,12 @@ void ReArrangeInput(int *InputR, int *InputI, int *BufferR, int *BufferI, int *R
 }
 
 /*
-The Pentium takes a surprising amount of time to calculate the sine and cosine.
+The Pentium takes a surprifpga_sing amount of time to calculate the fpga_sine and fpga_cofpga_sine.
 You may want to make the twiddle arrays static if doing repeated FFTs of the same size.
 This uses 4 fold symmetry to calculate the twiddle factors. As a result, this function
 requires a minimum FFT size of 8.
 */
-void FillTwiddleArray(int *TwiddleR, int *TwiddleI, int N, int type)
+void fpga_fill_Wn(int *TwiddleR, int *TwiddleI, int N, int type)
 {
     int j;
     int Theta, TwoPiOverN;
@@ -278,8 +272,8 @@ void FillTwiddleArray(int *TwiddleR, int *TwiddleI, int N, int type)
         for(j = 1;j < N/8; j++)
         {
             Theta = -(j * A_360) / N;
-            TwiddleR[j] = cos(Theta,0);
-            TwiddleI[j] = sin(Theta,0);
+            TwiddleR[j] = fpga_cos(Theta,0);
+            TwiddleI[j] = fpga_sin(Theta,0);
             TwiddleR[N/4-j] = -TwiddleI[j];
             TwiddleI[N/4-j] = -TwiddleR[j];
             TwiddleR[N/4+j] = TwiddleI[j];
@@ -301,8 +295,8 @@ void FillTwiddleArray(int *TwiddleR, int *TwiddleI, int N, int type)
         for(j = 1;j < N/8; j++)
         {
             Theta           = j * TwoPiOverN;
-            TwiddleR[j]     = cos(Theta,0);
-            TwiddleI[j]     = sin(Theta,0);
+            TwiddleR[j]     = fpga_cos(Theta,0);
+            TwiddleI[j]     = fpga_sin(Theta,0);
             TwiddleR[N/4-j] = TwiddleI[j];
             TwiddleI[N/4-j] = TwiddleR[j];
             TwiddleR[N/4+j] = -TwiddleI[j];
@@ -315,7 +309,7 @@ void FillTwiddleArray(int *TwiddleR, int *TwiddleI, int N, int type)
 
 //---------------------------------------------------------------------------
 // This calculates the required FFT size for a given number of points.
-int RequiredFFTSize(int NumPts)
+int fpga_required_FFT_size(int NumPts)
 {
     int N = MINIMUM_FFT_SIZE;
     while(N < NumPts && N < MAXIMUM_FFT_SIZE)
@@ -326,7 +320,7 @@ int RequiredFFTSize(int NumPts)
 }
 
 // The Fourier Transform.
-void Transform(int *InputR, int *InputI, int *BufferR, int *BufferI, int *TwiddleR, int *TwiddleI, int N)
+void fpga_tranform(int *InputR, int *InputI, int *BufferR, int *BufferI, int *TwiddleR, int *TwiddleI, int N)
 {
     int j, k, J, K, I, T;
     int *TempPointer;
@@ -336,7 +330,7 @@ void Transform(int *InputR, int *InputI, int *BufferR, int *BufferI, int *Twiddl
     while(J > 0) // Loops Log2(N) times.
     {
         // Swap pointers, instead doing this: for(j=0; j<N; j++) Input[j] = Buffer[j];
-        // We start with a swap because of the swap in ReArrangeInput.
+        // We start with a swap because of the swap in fpga_rearrange_input.
         TempPointer = InputR;
         InputR = BufferR;
         BufferR = TempPointer;

@@ -1,5 +1,5 @@
-MKDIR   := mkdir
-RMDIR   := rmdir /S /Q
+MKDIR   := md
+RMDIR   := rd /S /Q
 CC      := gcc
 BIN     := ./bin
 OBJ     := ./obj
@@ -11,11 +11,19 @@ EXE     := $(BIN)/main.exe
 CFLAGS  := -I$(INCLUDE) -O0 -g3
 LDLIBS  := -lm
 
+ifeq ($(OS),Windows_NT)
+	MKDIR   := md
+	RMDIR   := rd /S /Q
+else
+	MKDIR   := mkdir -p
+	RMDIR   := rm -rf
+endif
+
 .PHONY: all run clean build
 
-all : clean $(EXE) gdb
+all : clean $(EXE)
 
-gdb :
+gdb : all
 	gdb ./bin/main.exe
 
 $(EXE) : $(OBJS) | $(BIN)

@@ -66,9 +66,7 @@ int calcHeight(int length,int width)
     return length / width;
 }
 
-pixel *matrizPooling(imagem,matriz,height,width,y,x,ordem)
-    int height, width, y, x,ordem;
-    pixel *imagem, *matriz;
+pixel *matrizPooling(pixel *imagem,pixel *matriz,int height,int width,int y,int x,int ordem)
 {
 
     int posicao = y*width + x, posicaoPool = 0, j = 0, i = 0;

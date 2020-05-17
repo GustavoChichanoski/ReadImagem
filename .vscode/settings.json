@@ -1,14 +1,14 @@
 {
     "files.associations": {
-        "stdio.h": "c",
+        "operacaomatriz.h": "c",
+        "neuralnetwork.h": "c",
         "processamento.h": "c",
-        "bmp.h": "c",
-        "conversao.h": "c",
-        "operacaoPixel": "c",
-        "histograma": "c",
-        "detectores.h": "c",
+        "cnn.h": "c",
+        "malloc.h": "c",
         "operacaopixel.h": "c",
-        "string.h": "c",
-        "pooling.h": "c"
+        "cmath": "cpp",
+        "*.tcc": "cpp",
+        "detectores.h": "c",
+        "complex": "cpp"
     }
 }

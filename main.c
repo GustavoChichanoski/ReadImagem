@@ -8,18 +8,24 @@
 #include "../include/operacaoMatriz.h"
 #include "../include/processamento.h"
 #include "../include/neuralNetwork.h"
+#include "../include/fft.h"
 
 int main(int argc,char *argv[])
 {
-    srand(time(NULL));
     // reverse(10,2);
     long height, width;
     char *file_image;
     char *file_image2;
+    int kernel_size = 3;
     bmpfileheader file_header;
     bitmapheader  bmp_header;
-    file_image = ".\\img\\8k.bmp";
+    CNN_Layer *l;
+    l = malloc(sizeof(CNN_Layer));
+    l -> next = malloc(sizeof(CNN_Layer));
+    l -> next = NULL;
+    file_image = ".\\img\\gal.bmp";
     file_image2 = ".\\img\\gal_teste.bmp";
+    srand(time(NULL));
     if(read_bmp_file_header(file_image,&file_header))
     {
         printf("Informações sobre o arquivo não lidos\n");
@@ -43,24 +49,17 @@ int main(int argc,char *argv[])
     blue   = (int *) malloc(width * height * sizeof(int));
     green  = (int *) malloc(width * height * sizeof(int));
     out    = (int *) malloc(width * height * sizeof(int));
-    kernel = (int *) malloc(3 * 3 * sizeof(int));
-    for (int i = 0;i < width * height;i++)
-    {
-        red  [i] = 0;
-        blue [i] = 0;
-        green[i] = 0;
-    }
-    kernel[0] = 76; kernel[1] = 53; kernel[2] = 18;
-    kernel[3] = 48; kernel[4] = 25; kernel[5] = 2;
-    kernel[6] = 10; kernel[7] = 5;  kernel[8] = 20;
-    read_bmp_rgb(file_image,file_header,bmp_header,&red,&blue,&green);
+    kernel = (int *) malloc(kernel_size * kernel_size * sizeof(int));
+    read_bmp_image_rgb(file_image,file_header,bmp_header,&red,&blue,&green);
+    insert_layer_img(height,width,kernel_size,10,3,red,blue,green,&l);
+    insert_layer(height,width,RELU,3,10,&l);
+    insert_layer(height,width,CONV,3,10,&l);
+    insert_layer(height,width,RELU,3,10,&l);
+    insert_layer(height,width,POOL,3,10,&l);
+    insert_layer(height,width,CONV,3,10,&l);
+    insert_layer(height,width,RELU,3,10,&l);
+    insert_layer(height,width,CONV,3,10,&l);
+    insert_layer(height,width,RELU,3,10,&l);
+    insert_layer(height,width,POOL,3,10,&l);
     write_bmp_rgb(file_image2,&file_header,&bmp_header,&red,&blue,&green);
 }
-
-// void RELU(pxMat *img)
-// {
-//     for(int pos = 0;pos < img -> column * img -> row;pos++)
-//     {
-//         img -> image[pos] = reluPixel(img -> image[pos]);
-//     }
-// }

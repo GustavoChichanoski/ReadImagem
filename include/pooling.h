@@ -16,7 +16,7 @@
     #include <malloc.h>
     #include "bmp.h"
     #include "operacaoPixel.h"
-
+    
     pixel  maxPooling(pixel *matriz,int ordemMatriz);
     void   calcPad(int poolingOrdem,int height,int width);
     pixel  maxValorPixel(pixel MaximoAnterior, pixel ImagemAtual);
@@ -24,7 +24,8 @@
     int    calcHeight(int length,int width);
     pixel *matrizPooling(pixel *imagem,pixel *matriz,int height,int width,int y,int x,int ordem);
     pxMat  pooling(int stride, pxMat *imagem);
-
+    void   poolingInt(int stride,int **img,int img_width,int img_height,int **out,int *out_width,int *out_height);
+    
     #ifdef __cplusplus
         extern "C" }
     #endif

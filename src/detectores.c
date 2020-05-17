@@ -15,9 +15,7 @@ pixel  img_homo(pixel *matriz,pixel ref,int n);
 pixel  img_gauss(pixel *matriz,int n);
 pixel *zero_histograma(pixel *histograma,int gray_levels);
 
-pixel img_median(matriz,ordem)
-    pixel *matriz;
-    int ordem;
+pixel img_median(pixel *matriz,int ordem)
 {
     int posicao = 0;
     pixel reg;
@@ -42,9 +40,7 @@ pixel img_median(matriz,ordem)
 
 }
 
-pixel img_gauss(matriz,n)
-    pixel *matriz;
-    int n;
+pixel img_gauss(pixel *matriz,int n)
 {
 
     long max = 0, buffer;
@@ -79,9 +75,7 @@ pixel img_gauss(matriz,n)
 
 }
 
-pixel *sub_image(in,out,cols,rows)
-    pixel *in, *out;
-    long cols, rows;
+pixel *sub_image(pixel *in,pixel *out,int cols,int rows)
 {
 
     int x, y;
@@ -251,9 +245,7 @@ pixel *median_filter(width,height,imagem)
  * rgb      - Imagem a ser convertida                *
  * Saida    :                                        *
  * pixel**  - Imagem em preto e branco               */
-pixel *gray_scale(maxColunas,maxLinhas,imagem)
-    long maxColunas,maxLinhas;
-    pixel *imagem;
+pixel *gray_scale(int maxColunas,int maxLinhas,pixel *imagem)
 {
 
     /* Variavel que percorrem a matriz de pixel da imagem */
@@ -276,8 +268,8 @@ pixel *gray_scale(maxColunas,maxLinhas,imagem)
  * pixel **matriz : matriz de pixel     *
  * pixel   ref    : pixel de referência *
  * int     n      : ordem da matriz     */
-pixel img_homo(pixel *matriz,pixel ref,int n){
-
+pixel img_homo(pixel *matriz,pixel ref,int n)
+{
     long max = 0, aux;
     int x, y, n2 = n/2;
     int posicao = 0, posicaoMax = (n2)*n+n2+1;
@@ -308,14 +300,10 @@ pixel img_homo(pixel *matriz,pixel ref,int n){
  * rgb      - Imagem a ser convertida                *
  * Saida    :                                        *
  * pixel**  - Imagem com as bordas realçadas         */
-pixel *detectorBorda(maxColunas,maxLinhas,imagem)
-    int maxColunas, maxLinhas;
-    pixel *imagem;
+pixel *detectorBorda(int maxColunas,int maxLinhas,pixel *imagem)
 {
-
     int linha, coluna, ordemMatriz = 3,posicao = 0;
     pixel referencia, *m_pixel;
-
     for(linha = 0;linha < maxLinhas;linha++)
     {
         for(coluna = 0;coluna < maxColunas;coluna++)
@@ -326,7 +314,5 @@ pixel *detectorBorda(maxColunas,maxLinhas,imagem)
             posicao++;
         }
     }
-
     return imagem;
-
 }
