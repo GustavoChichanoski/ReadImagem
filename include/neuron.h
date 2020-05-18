@@ -8,6 +8,7 @@
     #include <stdio.h>
     #include <malloc.h>
     #include <string.h>
+    #include "cnn.h"
     #include "dendritic.h"
     #include "neuralNetwork.h"
     #define A_360            4095
@@ -31,6 +32,7 @@
     };
     typedef struct cnnNeuron CNN_Neuron;
     void malloc_neuron(CNN_Neuron **neuron);
+    void neuron_out(CNN_Neuron **neuron,int img_width,int img_height,int kernel_size);
     void insert_neuron(int img_height,int img_width,int kernel_size,int input_size,CNN_Neuron **l);
     void insert_neuron_img(int img_height,int img_width,int input_size,int kernel_size,int *red,int *blue,int *green, CNN_Neuron **l);
     #ifdef __cplusplus

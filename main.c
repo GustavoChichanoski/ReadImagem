@@ -52,14 +52,17 @@ int main(int argc,char *argv[])
     kernel = (int *) malloc(kernel_size * kernel_size * sizeof(int));
     read_bmp_image_rgb(file_image,file_header,bmp_header,&red,&blue,&green);
     insert_layer_img(height,width,kernel_size,10,3,red,blue,green,&l);
-    insert_layer(height,width,RELU,3,10,&l);
-    insert_layer(height,width,CONV,3,10,&l);
-    insert_layer(height,width,RELU,3,10,&l);
-    insert_layer(height,width,POOL,3,10,&l);
-    insert_layer(height,width,CONV,3,10,&l);
-    insert_layer(height,width,RELU,3,10,&l);
-    insert_layer(height,width,CONV,3,10,&l);
-    insert_layer(height,width,RELU,3,10,&l);
-    insert_layer(height,width,POOL,3,10,&l);
+    {   /* CNN of https://poloclub.github.io/cnn-explainer/#article-pooling*/
+        insert_layer(height,width,RELU,3,10,&l);
+        insert_layer(height,width,CONV,3,10,&l);
+        insert_layer(height,width,RELU,3,10,&l);
+        insert_layer(height,width,POOL,3,10,&l);
+        insert_layer(height,width,CONV,3,10,&l);
+        insert_layer(height,width,RELU,3,10,&l);
+        insert_layer(height,width,CONV,3,10,&l);
+        insert_layer(height,width,RELU,3,10,&l);
+        insert_layer(height,width,POOL,3,10,&l);
+    }
+    neuron_out(&(l -> neuron),l -> img_width,l -> img_height,l -> kernel_size);
     write_bmp_rgb(file_image2,&file_header,&bmp_header,&red,&blue,&green);
 }

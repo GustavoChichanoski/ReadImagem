@@ -40,6 +40,7 @@
     };
     typedef struct cnnLayer CNN_Layer;
     void malloc_layer(CNN_Layer **layer);
+    void convolucaoInt(int *img,int img_width,int img_height,int *kernel,int kernel_degree,int **out,int stride);
     void insert_layer_img(int img_height, int img_width, int kernel_size, int neuron_number, int input_number, int *red, int *blue, int *green, CNN_Layer **l);
     void insert_layer(int img_height, int img_width, int type, int kernel_size, int neuron_number, CNN_Layer **l);
     // void   imprimeMatriz(pxMat matriz);
