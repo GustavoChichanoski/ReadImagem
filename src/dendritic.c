@@ -8,18 +8,12 @@
     int           *kernel_size - ordem do nucleo de conversao da imagem
     CNN_Dendritic *head        - Dentrito
 */
-void insert_dendritic_img
-(
-    int *img,
-    int img_width,
-    int img_height,
-    int kernel_size,
-    CNN_Dendritic **head
-)
+void dendritic_insert_img(int *img,int img_width,int img_height,int kernel_size,CNN_Dendritic **head)
 {
     CNN_Dendritic *d;
-    malloc_dendritic(&d);
-    malloc_dendritic(&last);
+    CNN_Dendritic *last;
+    dendritic_malloc(&d);
+    last = (*head);
     d -> img          = malloc(img_width   * img_height  * sizeof(int));
     d -> intermediate = malloc(img_width   * img_height  * sizeof(int));
     d -> kernel       = malloc(kernel_size * kernel_size * sizeof(int));
@@ -27,40 +21,47 @@ void insert_dendritic_img
     {
         d -> img[i] = img[i];
     }
-    if((*head))
-    while((*head) -> next != NULL)
+    if((*head) -> prev == NULL)
     {
-        (*l) = (*l) -> next;
+        (*head)         = d;
+        (*head) -> prev = d;
+        return;
     }
-    d -> prev = 
-    (*l) -> next = 
+    while(last -> next != NULL)
+    {
+        last = last -> next;
+    }
+    d    -> prev = last;
+    last -> next = d;
 }
 
-void insert_dendritic
-(
-    int img_height,
-    int img_width,
-    int kernel_size,
-    CNN_Dendritic **l
-)
+void dendritic_insert(int img_height,int img_width,int out_height,int out_width,int kernel_size,int type,CNN_Dendritic **l)
 {
     CNN_Dendritic *start;
     CNN_Dendritic *temp;
-    malloc_dendritic(&temp);
-    malloc_dendritic(&start);
-    int max  = img_height  * img_width, core = kernel_size * kernel_size;
-    start                = (*l);
-    temp -> img          = malloc(max  * sizeof(int));
-    temp -> intermediate = malloc(max  * sizeof(int));
-    temp -> kernel       = malloc(core * sizeof(int));
-    for (int i = 0;i < core;i++)
+    dendritic_malloc(&temp);
+    dendritic_malloc(&start);
+    int max     = img_height  * img_width, core = kernel_size * kernel_size;
+    start       = (*l);
+    temp -> img = malloc(max  * sizeof(int));
+    if(type == CONV)
     {
-        temp -> kernel[i] = random_number(_ONE,ONE);
+        temp -> intermediate = malloc(max  * sizeof(int));
+        temp -> kernel       = malloc(core * sizeof(int));
+        for (int i = 0;i < max;i++)
+        {
+            if(i < core)
+            {
+                temp -> kernel[i] = random_number(_ONE,ONE);
+            }
+            temp -> img[i]          = 0;
+            temp -> intermediate[i] = 0;
+        }
     }
-    for (int i = 0;i < max;i++)
+    if((*l) -> prev == NULL)
     {
-        temp -> intermediate[i] = 0;
-        temp -> img[i]          = 0;
+        (*l)         = temp;
+        (*l) -> prev = temp;
     }
     while(start -> next != NULL)
     {
@@ -71,7 +72,7 @@ void insert_dendritic
     start -> next = temp;
 }
 
-void malloc_dendritic(CNN_Dendritic **dendritic)
+void dendritic_malloc(CNN_Dendritic **dendritic)
 {
     (*dendritic)         = malloc(sizeof(CNN_Dendritic));
     (*dendritic) -> next = malloc(sizeof(CNN_Dendritic));
@@ -84,15 +85,15 @@ void dendrintic_conv(CNN_Neuron *n_head,int img_width,int img_height,int kernel_
 {
     CNN_Neuron    *n_temp;
     CNN_Dendritic *d_temp;
-    malloc_neuron(&n_temp);
-    malloc_dendritic(&d_temp);
+    neuron_malloc(&n_temp);
+    dendritic_malloc(&d_temp);
     n_temp = n_head;
     while(n_temp -> next != NULL)
     {
         d_temp = n_temp -> dendritic;
         while(d_temp != NULL)
         {
-            convolucaoInt(d_temp -> img,img_width,img_height,d_temp -> kernel,kernel_size,d_temp -> intermediate,1);
+            convolucaoInt(d_temp -> img,img_width,img_height,d_temp -> kernel,kernel_size,&(d_temp -> intermediate),1);
             d_temp = d_temp -> next;
         }
         d_temp = n_temp -> dendritic;

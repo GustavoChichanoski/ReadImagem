@@ -1,5 +1,4 @@
-#ifndef BMP_H
-#define BMP_H
+#pragma once
 
 /* File:   read_BMP.h
  * Author: Gustavo
@@ -38,7 +37,6 @@
  *   Define the Microsoft contants.  If you
  *   are using OTHERC, then just put numbers
  *   there to hold a place. */
-
 #ifdef MSC
     #define VRES16COLOR  _VRES16COLOR
     #define ERESCOLOR    _ERESCOLOR
@@ -59,16 +57,6 @@
     #define GCLEARSCREEN 1
 #endif
 
-#ifdef CONVERSAO_EXPORTS
-    #define CONVERSAO_API __declspec(dllexport)
-    #else
-    #define CONVERSAO_API __declspec(dllimport)
-#endif
-
-#ifdef __cplusplus
-    extern "C" {
-#endif
-
 /* structs of Header TIFF
  * A seguir forams definidas as estruturas necessárias
  * para a leitura do cabeçalho de um arquivo TIFF.
@@ -85,7 +73,6 @@ typedef struct{
  * A seguir as definições de struct com as informações
  * necessárias para se ler os cabeçalhos dos arquivos
  * bmp */
-
 /* bitmapheader
  * Contem as informações relacionada a imagem
  * unsigned long size[4]         - tamanho da imagem
@@ -129,7 +116,6 @@ typedef struct {
     short           reserved1;
     /* 2 Bytes - Campo reservado 2 para uso futuro deve ser ZERO */
     short           reserved2;
-
     /* 4 Bytes - Especifica o deslocamento, em bytes,
      * para o início da área de dados da imagem, a partir
      * do início deste cabeçalho.
@@ -170,15 +156,3 @@ int    write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_he
 int    free_image_array(pixel *the_array,long width,long height);
 int    write_bmp_rgb(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,int **red,int **blue,int **green);
 int    read_bmp_image_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green);
-// pwd(int a,int b)
-// {
-//     register int t = 1;
-//     for(;b;b--) t = t*a;
-//     return t;
-// }
-
-#ifdef __cplusplus
-    }
-#endif
-
-#endif	/* READ_BMP_H */

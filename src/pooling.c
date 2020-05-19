@@ -137,7 +137,7 @@ pxMat pooling(int stride,pxMat *img)
     image  : RGB of image
     stride : how big are the steps of the filter
 */
-void poolingInt(int stride,int **img,int img_width,int img_height,int **out,int *out_width,int *out_height)
+void poolingInt(int stride,int *img,int img_width,int img_height,int **out,int *out_width,int *out_height)
 {
     int max_valor;
     int column = 0, row = 0;
@@ -151,12 +151,12 @@ void poolingInt(int stride,int **img,int img_width,int img_height,int **out,int 
     {
         for (pos_x = 0; pos_x < img_width;pos_x = pos_x + stride)
         {
-            max_valor = (*img)[pos_y * img_width + pos_x];
+            max_valor = img[pos_y * img_width + pos_x];
             for (i = pos_x; i < pos_x + stride && i < img_width;i++)
             {
                 for (j = pos_y;j < pos_y + stride && j < img_height; j++)
                 {
-                    max_valor = (max_valor > (*img)[j * img_width + i]) ? max_valor : (*img)[j*img_width + i];
+                    max_valor = (max_valor > img[j * img_width + i]) ? max_valor : img[j*img_width + i];
                 }
             }
             (*out)[out_y * column + out_x] = max_valor;

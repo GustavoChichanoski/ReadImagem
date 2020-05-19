@@ -3,7 +3,8 @@
 int *matriz_sum(int *a,int *b,int m,int n)
 {
     int i, max = m * n;
-    int *c = malloc(max * sizeof(int));
+    int *c;
+    c = malloc(max * sizeof(int));
     for(i = 0;i < max;i++)
     {
         c[i] = a[i] + b[i];

@@ -8,6 +8,7 @@
         "operacaopixel.h": "c",
         "cmath": "cpp",
         "*.tcc": "cpp",
+        "*.h" : "c",
         "detectores.h": "c",
         "complex": "cpp"
     }

@@ -5,10 +5,7 @@
  * This takes a two byte unsiged
  * short out of a buffer of characters.
  * It is important to know the byte order LSB or MSB. */
-void extract_ushort_from_buffer(buffer,lsb,start,number)
-    char buffer[];
-    int lsb, start;
-    unsigned short *number;
+void extract_ushort_from_buffer(char buffer[],int lsb,int start,unsigned short *number)
 {
     union ushort_char_union lcu;
     if(lsb == 1){
@@ -24,10 +21,7 @@ void extract_ushort_from_buffer(buffer,lsb,start,number)
 /* extract_short_from_buffer(...)
  * This takes a two byte short out of a buffer of characters.
  * It is important to know the byte order LSB or MSB. */
-void extract_short_from_buffer(buffer,lsb,start,number)
-    char buffer[];
-    int lsb, start;
-    short *number;
+void extract_short_from_buffer(char buffer[],int lsb,int start,short *number)
 {
     union short_char_union lcu;
     if(lsb == 1){
@@ -41,10 +35,7 @@ void extract_short_from_buffer(buffer,lsb,start,number)
 }
 
 /* Converte um vetor de char para long */
-void extract_long_from_buffer(buffer, lsb, start, number)
-    char buffer[];
-    int lsb, start;
-    long *number;
+void extract_long_from_buffer(char buffer[],int lsb,int start,long *number)
 {
     union long_char_union lcu;
     if(lsb == 1){
@@ -62,10 +53,7 @@ void extract_long_from_buffer(buffer, lsb, start, number)
 } /* Ends c2l */
 
 /* Converte um vetor de char para unsigned long */
-void extract_ulong_from_buffer(buffer,lsb,start,number)
-    char buffer[];
-    int lsb, start;
-    unsigned long *number;
+void extract_ulong_from_buffer(char buffer[],int lsb,int start,unsigned long *number)
 {
     union ulong_char_union lcu;
     if(lsb == 1){
@@ -83,10 +71,7 @@ void extract_ulong_from_buffer(buffer,lsb,start,number)
 }
 
 /* Insere 2 bytes no arquivo de imagem */
-void insert_short_into_buffer(buffer,start,number)
-    char buffer[];
-    int start;
-    short number;
+void insert_short_into_buffer(char buffer[],int start,short number)
 {
     union short_char_union lsu;
     lsu.s_num = number;
@@ -95,10 +80,7 @@ void insert_short_into_buffer(buffer,start,number)
 } /* Ends insert_short_into_buffer */
 
 /* Insere dois bytes no arquivo de imagem */
-void insert_ushort_into_buffer(buffer,start,number)
-    char buffer[];
-    int start;
-    unsigned short number;
+void insert_ushort_into_buffer(char buffer[],int start,unsigned short number)
 {
     union ushort_char_union lsu;
     lsu.s_num = number;
@@ -107,10 +89,7 @@ void insert_ushort_into_buffer(buffer,start,number)
 }
 
 /* Insere quatro bytes no arquivo de imagem */
-void insert_long_into_buffer(buffer,start,number)
-    char buffer[];
-    int start;
-    long number;
+void insert_long_into_buffer(char buffer[],int start,long number)
 {
     union long_char_union lsu;
     lsu.l_num = number;
@@ -123,10 +102,7 @@ void insert_long_into_buffer(buffer,start,number)
 /* insert_ulong_into_buffer(...)                                        *
  * This inserts a four byte unsigned long into a buffer of characters.  *
  * It does this is LSB order.                                           */
-void insert_ulong_into_buffer(buffer,start,number)
-    char buffer[];
-    int start;
-    unsigned long number;
+void insert_ulong_into_buffer(char buffer[],int start,unsigned long number)
 {
     union ulong_char_union lsu;
     lsu.l_num = number;

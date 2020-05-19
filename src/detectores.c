@@ -17,10 +17,11 @@ pixel *zero_histograma(pixel *histograma,int gray_levels);
 
 pixel img_median(pixel *matriz,int ordem)
 {
-    int posicao = 0;
+    int posicao, ordem2;
     pixel reg;
     reg = igualarCorPixel(0);
-
+    posicao = 0;
+    ordem2 = ordem * ordem;
     for(int y = 0;y < ordem;y++)
     {
         for(int x = 0;x < ordem;x++)
@@ -31,23 +32,17 @@ pixel img_median(pixel *matriz,int ordem)
             posicao++;
         }
     }
-    int ordem2 = ordem*ordem;
     reg.blue  /= ordem2;
     reg.green /= ordem2;
     reg.red   /= ordem2;
-
     return reg;
-
 }
 
 pixel img_gauss(pixel *matriz,int n)
 {
-
     long max = 0, buffer;
     pixel aux;
-    int maxX = 1, maxY = 1, n1 = n - 1, x = 0, y = 0;
-    int n2 = n/2,posicao = 0;
-
+    int maxX = 1, maxY = 1, n1 = n - 1, x = 0, y = 0, n2 = n/2,posicao = 0;
     for (y = 0;y < n; y++)
     {
         for (x = 0;x < n; x++)
@@ -65,22 +60,17 @@ pixel img_gauss(pixel *matriz,int n)
             }
         }
     }
-
     /* matriz[0][0] - matriz[2][2] **
     ** matriz[0][1] - matriz[2][1] **
     ** matriz[0][2] - matriz[2][0] **
     ** matriz[1][0] - matriz[1][2] */
-
     return matriz[maxY*3+maxX];
-
 }
 
 pixel *sub_image(pixel *in,pixel *out,int cols,int rows)
 {
-
     int x, y;
     int posicao = 0;
-
     for(y = 0;y < rows;y++)
     {
         for(x = 0;x < cols;x++)
@@ -91,21 +81,15 @@ pixel *sub_image(pixel *in,pixel *out,int cols,int rows)
             posicao++;
         }
     }
-
     return out;
 }
 
-pixel *edge_gauss(maxLinha,maxColuna,imagem)
-    long maxColuna, maxLinha;
-    pixel *imagem;
+pixel *edge_gauss(long maxLinha,long maxColuna,pixel *imagem)
 {
-
     int coluna, linha, posicao = 0;
     pixel ref, *aux, *m_pixel;
-    
     m_pixel = allocate_image_array(3,3);
     aux = allocate_image_array(maxLinha,maxColuna);
-
     for(linha = 0;linha < maxLinha;linha++)
     {
         for(coluna = 0;coluna < maxColuna;coluna++)
@@ -116,9 +100,7 @@ pixel *edge_gauss(maxLinha,maxColuna,imagem)
             posicao++;
         }
     }
-
     return aux;
-
 }
 
 /* Verifica se a coluna e a linha passada estao dentro da zona valida *
@@ -133,11 +115,10 @@ pixel *edge_gauss(maxLinha,maxColuna,imagem)
  *      1 - O pixel esta em uma regiao valida
  *      0 - O pixel esta fora da regiao valida
  * */
-int zonaImagemValida(minLinhas,maxLinhas,minColunas,maxColunas,linha,coluna)
-    int minLinhas, maxLinhas, minColunas, maxColunas, linha, coluna;
+int zonaImagemValida(int minL,int maxL,int minC,int maxC,int linha,int coluna)
 {
     /* Verifica se a coluna ou a linha sao menores que o minimo ou se a coluna e a linha sao maiores que o maximo */
-    if((minLinhas <= linha && linha < maxLinhas) && (minColunas <= coluna && coluna < maxColunas))
+    if((minL <= linha && linha < maxL) && (minC <= coluna && coluna < maxC))
     {
         return 1; /* A coluna esta dentro da zona valida */
     }
@@ -208,31 +189,22 @@ pixel *m_matriz(imagem,ordemMatriz,maxLinhas,maxColunas,linha,coluna)
 
 }
 
-pixel *median_filter(width,height,imagem)
-    long width,height;
-    pixel *imagem;
+pixel *median_filter(long width,long height,pixel *imagem)
 {
-
     int x, y;
     pixel *saida, *m_pixel, aux;
-
     aux     = igualarCorPixel(0);
     m_pixel = allocate_image_array(3,3);
     saida   = allocate_image_array(height,width);
-
-    /*  */
     for(y = 0; y < height; y++)
     {
-        /*  */
         for(x = 0; x < width; x++)
         {
             m_pixel = m_matriz(imagem,3,width,height,x,y);
             saida[y*width + x] = img_median(m_pixel,3);
         }
     }
-
     return saida;
-
 }
 
 /* Converte a imagem para a escala cinza             *
@@ -247,7 +219,6 @@ pixel *median_filter(width,height,imagem)
  * pixel**  - Imagem em preto e branco               */
 pixel *gray_scale(int maxColunas,int maxLinhas,pixel *imagem)
 {
-
     /* Variavel que percorrem a matriz de pixel da imagem */
     int linha, coluna, posicao = 0;
     /* Loop para percorrer as linhas da matriz */
@@ -273,7 +244,6 @@ pixel img_homo(pixel *matriz,pixel ref,int n)
     long max = 0, aux;
     int x, y, n2 = n/2;
     int posicao = 0, posicaoMax = (n2)*n+n2+1;
-
     for(y = 0;y < n;y++)
     {
         for(x = 0;x < n;x++)
