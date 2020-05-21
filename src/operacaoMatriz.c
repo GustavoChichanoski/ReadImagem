@@ -83,7 +83,6 @@ Matriz transposed(Matriz mat)
 
 Matriz multiplyMatriz(Matriz first,Matriz second)
 {
-    int row = 0, column = 0, i = 0, sum = 0;
     Matriz result;
     result = create_matriz(first.row,second.column);
     if(first.column != second.row)
@@ -91,12 +90,12 @@ Matriz multiplyMatriz(Matriz first,Matriz second)
         printf("MatA com colunas diferentes de MatB");
         exit(EXIT_FAILURE);
     }
-    for (row = 0; row < first.row; row++)
+    for (int row = 0; row < first.row; row++)
     {
-        for (column = 0; column < second.column; column++)
+        for (int column = 0; column < second.column; column++)
         {
             int sum = 0;
-            for (i = 0;i < first.column;i++)
+            for (int i = 0;i < first.column;i++)
             {   
                 int f = first.mat[row * first.column + i];
                 int s = second.mat[i * second.column + column];
@@ -105,7 +104,6 @@ Matriz multiplyMatriz(Matriz first,Matriz second)
             result.mat[row*second.column + column] = sum;
         }
     }
-    printf("\n");
     return result;
 }
 
@@ -125,7 +123,7 @@ Matriz create_matriz(int row,int column)
 
 Matriz hadamart(Matriz erro,Matriz dS)
 {
-    if(erro.row == dS.row && erro.column == erro.column)
+    if(erro.row == dS.row)
     {
         for (int pos = 0;pos < dS.column*dS.row;pos++)
         {

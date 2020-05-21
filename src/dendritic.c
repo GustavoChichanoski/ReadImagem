@@ -1,5 +1,7 @@
 #include "../include/dendritic.h"
 
+void convolucaoInt(int *img,int img_width,int img_height,int *kernel,int kernel_degree,int **out,int stride);
+
 /* Insere um dentrito
     INPUTS :
     int           *img         - Imagem a ser gravada no dentrito
@@ -19,20 +21,27 @@ void dendritic_insert_img(int *img,int img_width,int img_height,int kernel_size,
     d -> kernel       = malloc(kernel_size * kernel_size * sizeof(int));
     for(int i = 0;i < img_height * img_width;i++)
     {
+        if(i < kernel_size * kernel_size)
+        {
+            d -> kernel[i] = random_number(_ONE,ONE);
+        }
         d -> img[i] = img[i];
     }
     if((*head) -> prev == NULL)
     {
         (*head)         = d;
         (*head) -> prev = d;
+        (*head) -> next = d;
         return;
     }
-    while(last -> next != NULL)
+    while(last -> next != (*head))
     {
         last = last -> next;
     }
-    d    -> prev = last;
-    last -> next = d;
+    last    -> next = d;
+    d       -> prev = last;
+    d       -> next = (*head);
+    (*head) -> prev = d;
 }
 
 void dendritic_insert(int img_height,int img_width,int out_height,int out_width,int kernel_size,int type,CNN_Dendritic **l)
@@ -43,33 +52,30 @@ void dendritic_insert(int img_height,int img_width,int out_height,int out_width,
     dendritic_malloc(&start);
     int max     = img_height  * img_width, core = kernel_size * kernel_size;
     start       = (*l);
-    temp -> img = malloc(max  * sizeof(int));
     if(type == CONV)
     {
         temp -> intermediate = malloc(max  * sizeof(int));
         temp -> kernel       = malloc(core * sizeof(int));
-        for (int i = 0;i < max;i++)
+        for (int i = 0;i < core;i++)
         {
-            if(i < core)
-            {
-                temp -> kernel[i] = random_number(_ONE,ONE);
-            }
-            temp -> img[i]          = 0;
-            temp -> intermediate[i] = 0;
+            temp -> kernel[i] = random_number(_ONE,ONE);
         }
     }
     if((*l) -> prev == NULL)
     {
         (*l)         = temp;
         (*l) -> prev = temp;
+        (*l) -> next = temp;
+        return;
     }
-    while(start -> next != NULL)
+    while(start -> next != (*l))
     {
         start = start -> next;
     }
-    temp  -> next = NULL;
-    temp  -> prev = start;
     start -> next = temp;
+    temp  -> prev = start;
+    temp  -> next = (*l);
+    (*l)  -> prev = temp;
 }
 
 void dendritic_malloc(CNN_Dendritic **dendritic)
@@ -81,31 +87,39 @@ void dendritic_malloc(CNN_Dendritic **dendritic)
     (*dendritic) -> prev = NULL;
 }
 
-void dendrintic_conv(CNN_Neuron *n_head,int img_width,int img_height,int kernel_size)
+void convolucaoInt(int *img,int img_width,int img_height,int *kernel,int kernel_degree,int **out,int stride)
 {
-    CNN_Neuron    *n_temp;
-    CNN_Dendritic *d_temp;
-    neuron_malloc(&n_temp);
-    dendritic_malloc(&d_temp);
-    n_temp = n_head;
-    while(n_temp -> next != NULL)
+    int kernel_x, kernel_y, kernel_med = kernel_degree / 2, kernel_pos = 0;
+    int img_x, img_y, img_x_new, img_y_new, img_pos_new;
+    int out_pos = 0;
+    int soma = 0;
+    int v_k = 0;
+    int v_i = 0;
+    for (img_y = 0;img_y < img_height;img_y += stride)
     {
-        d_temp = n_temp -> dendritic;
-        while(d_temp != NULL)
+        for (img_x = 0;img_x < img_width;img_x += stride)
         {
-            convolucaoInt(d_temp -> img,img_width,img_height,d_temp -> kernel,kernel_size,&(d_temp -> intermediate),1);
-            d_temp = d_temp -> next;
-        }
-        d_temp = n_temp -> dendritic;
-        for (int i = 0;i < img_height * img_width;i++)
-        {
-            n_temp -> out[i]  = n_temp -> bias;
-            while(d_temp -> next != NULL)
+            (*out)[out_pos] = 0;
+            soma = 0;
+            kernel_pos = 0;
+            for(kernel_y = -kernel_med;kernel_y < kernel_med + 1;kernel_y++)
             {
-                n_temp -> out[i] += d_temp -> intermediate[i];
+                for(kernel_x = -kernel_med;kernel_x < kernel_med + 1;kernel_x++)
+                {
+                    img_x_new = img_x + kernel_x;
+                    img_y_new = img_y + kernel_y;
+                    if(img_y_new > -1 && img_y_new < img_height && img_x_new > -1 && img_x_new < img_width)
+                    {
+                        img_pos_new      = img_y_new * img_width + img_x_new;
+                        v_k = kernel[kernel_pos];
+                        v_i = img[img_pos_new];
+                        soma            += kernel[kernel_pos] * img[img_pos_new] / ONE;
+                        (*out)[out_pos] += kernel[kernel_pos] * img[img_pos_new] / ONE;
+                    }
+                    kernel_pos++;
+                }
             }
-            n_temp -> out[i] += d_temp -> intermediate[i];
+            out_pos++;
         }
-        n_temp = n_temp -> next;
     }
 }

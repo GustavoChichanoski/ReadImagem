@@ -8,7 +8,7 @@ SRC     := ./src
 SRCS    := $(wildcard $(SRC)/*.c)
 OBJS    := $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(SRCS))
 EXE     := $(BIN)/main.exe
-CFLAGS  := -I$(INCLUDE) -O0 -g3
+CFLAGS  := -I$(INCLUDE) -O0 -g3 -Wall
 LDLIBS  := -lm
 
 ifeq ($(OS),Windows_NT)
@@ -28,7 +28,7 @@ gdb : all
 
 $(EXE) : $(OBJS) | $(BIN)
 	$(CC) $(CFLAGS) ./main.c $^ -o $@ $(LDLIBS)
-
+	
 $(OBJ)/%.o : $(SRC)/%.c | $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 

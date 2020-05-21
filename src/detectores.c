@@ -42,7 +42,7 @@ pixel img_gauss(pixel *matriz,int n)
 {
     long max = 0, buffer;
     pixel aux;
-    int maxX = 1, maxY = 1, n1 = n - 1, x = 0, y = 0, n2 = n/2,posicao = 0;
+    int maxX = 1, maxY = 1, n1 = n - 1, x = 0, y = 0, n2 = n/2;
     for (y = 0;y < n; y++)
     {
         for (x = 0;x < n; x++)
@@ -87,14 +87,13 @@ pixel *sub_image(pixel *in,pixel *out,int cols,int rows)
 pixel *edge_gauss(long maxLinha,long maxColuna,pixel *imagem)
 {
     int coluna, linha, posicao = 0;
-    pixel ref, *aux, *m_pixel;
+    pixel *aux, *m_pixel;
     m_pixel = allocate_image_array(3,3);
     aux = allocate_image_array(maxLinha,maxColuna);
     for(linha = 0;linha < maxLinha;linha++)
     {
         for(coluna = 0;coluna < maxColuna;coluna++)
         {
-            ref     = imagem[posicao];
             m_pixel = m_matriz(imagem,3,maxColuna,maxLinha,linha,coluna);
             aux[posicao] = img_gauss(m_pixel,3);
             posicao++;
@@ -192,8 +191,7 @@ pixel *m_matriz(imagem,ordemMatriz,maxLinhas,maxColunas,linha,coluna)
 pixel *median_filter(long width,long height,pixel *imagem)
 {
     int x, y;
-    pixel *saida, *m_pixel, aux;
-    aux     = igualarCorPixel(0);
+    pixel *saida, *m_pixel;
     m_pixel = allocate_image_array(3,3);
     saida   = allocate_image_array(height,width);
     for(y = 0; y < height; y++)

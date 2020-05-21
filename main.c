@@ -5,9 +5,11 @@
 #include "../include/bmp.h"
 #include "../include/detectores.h"
 #include "../include/cnn.h"
+#include "../include/cnn_exec.h"
 #include "../include/operacaoMatriz.h"
 #include "../include/neuralNetwork.h"
 #include "../include/fft.h"
+#include "../include/processamento.h"
 
 int main(int argc,char *argv[])
 {
@@ -19,9 +21,8 @@ int main(int argc,char *argv[])
     bmpfileheader file_header;
     bitmapheader  bmp_header;
     CNN_Layer *l;
-    CNN_Layer *last;
-    malloc_layer(&l);
-    file_image = ".\\img\\gal.bmp";
+    layer_malloc(&l);
+    file_image = ".\\img\\expresso_1.bmp";
     file_image2 = ".\\img\\gal_teste.bmp";
     srand(time(NULL));
     if(read_bmp_file_header(file_image,&file_header))
@@ -41,36 +42,38 @@ int main(int argc,char *argv[])
         height = height*(-1);
     }
     int *red, *blue, *green;
-    int *out, out_width, out_height;
-    int *kernel;
     red    = (int *) malloc(width * height * sizeof(int));
     blue   = (int *) malloc(width * height * sizeof(int));
     green  = (int *) malloc(width * height * sizeof(int));
-    out    = (int *) malloc(width * height * sizeof(int));
-    kernel = (int *) malloc(kernel_size * kernel_size * sizeof(int));
     read_bmp_image_rgb(file_image,file_header,bmp_header,&red,&blue,&green);
     layer_insert_img(height,width,kernel_size,10,3,red,blue,green,&l);
     {   /* CNN of https://poloclub.github.io/cnn-explainer/#article-pooling*/
-        layer_insert(RELU,3,10,&l);
-        layer_insert(CONV,3,10,&l);
-        layer_insert(RELU,3,10,&l);
-        layer_insert(POOL,3,10,&l);
-        layer_insert(CONV,3,10,&l);
-        layer_insert(RELU,3,10,&l);
-        layer_insert(CONV,3,10,&l);
-        layer_insert(RELU,3,10,&l);
-        layer_insert(POOL,3,10,&l);
+        layer_insert(3,10,RELU,&l);
+        layer_insert(3,10,CONV,&l);
+        layer_insert(3,10,RELU,&l);
+        layer_insert(3,10,POOL,&l);
+        layer_insert(3,10,CONV,&l);
+        layer_insert(3,10,RELU,&l);
+        layer_insert(3,10,CONV,&l);
+        layer_insert(3,10,RELU,&l);
+        layer_insert(3,10,POOL,&l);
     }
-    neuron_out(&(l -> neuron),l -> img_width,l -> img_height,l -> kernel_size);
-    while(last -> prev == last)
+    layer_calc(&l);
+    CNN_Layer *last;
+    CNN_Neuron *n_last;
+    last = l;
+    do
     {
-        last = l;
-        while(last -> prev == NULL)
+        n_last = last -> neuron;
+        do
         {
-            last = last -> next;
-        }
-        free(last);
-    }
+            img_creat_red_to_blue(n_last -> out,(last -> out_height)*(last -> out_width),&red,&blue,&green);
+            bmp_header.width = last -> out_width;
+            bmp_header.height = last -> out_height;
+            write_bmp_rgb(file_image2,&file_header,&bmp_header,&red,&blue,&green);
+            n_last = n_last -> next;
+        } while (n_last != last -> neuron);
+        last = last -> next;
+    } while (last != l);
     free(l);
-    write_bmp_rgb(file_image2,&file_header,&bmp_header,&red,&blue,&green);
 }

@@ -1,11 +1,5 @@
 #include "../include/neuralNetwork.h"
 
-#define MED        127
-#define MIN        -255 /* DEFAULT */
-#define MAX        255  /* DEFAULT */
-#define BIAS       1
-#define LEARN_RATE 100
-
 int    random_number(int min_num,int max_num);
 pixel  rootMeanSquare(pixel *error,int neurons);
 int    floorSqrt(int erro);
@@ -144,31 +138,9 @@ void imprime(Layer *l)
     }
 }
 
-Layer *add(int kernel,pxMat input,Layer layer)
-{
-    
-}
-
-Layer *convLayer(int kernel,pxMat imagem,int filter)
-{
-    for (int i = 0;i < filter;i++)
-    {
-        
-    }
-}
-
 int empty(Layer *l)
 {
     return (l == NULL) ? 1 : 0;
-}
-
-int *calcCamada(int *input,Layer *l)
-{
-    Layer *p;
-    for (p = l;p != NULL;p = p -> next)
-    {
-        p -> output = multiplyMatriz(l -> weight,l -> input);
-    }
 }
 
 void freeCamada(Layer *l)

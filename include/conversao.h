@@ -2,11 +2,26 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "conversao.h"
-#include "bmp.h"
-#include "detectores.h"
-#include "histograma.h"
-#include "operacaoPixel.h"
+
+#define  MED              127
+#define  MIN              -255 /* DEFAULT */
+#define  MAX              255  /* DEFAULT */
+#define  BIAS             1
+#define  LEARN_RATE       100
+#define  A_360            4095
+#define  SQRT_2           5793
+#define  A_180            2047
+#define  A_90             1023
+#define  FORWARD          0
+#define  INVERSE          1
+#define  MINIMUM_FFT_SIZE 8
+#define  MAXIMUM_FFT_SIZE 1048576
+#define  POOL             0
+#define  CONV             1
+#define  RELU             2
+#define  ONE              255
+#define _ONE              -256
+
 
 /* Armazena duas variaveis no mesmo espaco da memoria */
 union short_char_union

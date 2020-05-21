@@ -17,7 +17,7 @@ int    write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_he
 int    free_image_array(pixel *the_array,long width,long height);
 int    calculate_pad(long width);
 int    ordem_de_leitura(long height);
-void   read_bmp_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int ***red,int ***blue,int ***green);
+void   read_bmp_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green);
 int    read_bmp_image_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green);
 
 /* Define a ordem de leitura da imagme */
@@ -62,13 +62,12 @@ pixel *read_color_table(char *file_name,int height,int width,pixel *imagem)
     return imagem;
 }
 
-void read_bmp_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int ***red,int ***blue,int ***green)
+void read_bmp_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green)
 {
     FILE *fp;
     char buffer[10];
     long position = 0;
     int  column, row, pad, width = bmheader.width, height = bmheader.height;
-    printf("Read color table\n");
     fp       = fopen(file_name,"rb");
     position = fseek(fp,54,SEEK_SET);
     pad      = calculate_pad(width);
@@ -78,11 +77,14 @@ void read_bmp_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheade
         {
             position = row*width + column;
             fread(buffer,sizeof(char),3,fp);
-            (**blue)[position]  = buffer[0];
-            (**green)[position] = buffer[1];
-            (**red)[position]   = buffer[2];
+            (*blue)[position]  = (int) buffer[0];
+            (*green)[position] = (int) buffer[1];
+            (*red)[position]   = (int) buffer[2];
         }
-        if(pad > 0){ fread(buffer,sizeof(char),pad,fp); }
+        if(pad > 0)
+        {
+            fread(buffer,sizeof(char),pad,fp);
+        }
     }
     fclose(fp);
 }
@@ -95,7 +97,6 @@ int read_bmp_file_header(char *file_name,bmpfileheader *file_header)
 {
 
     char buffer[10];
-    long ll;
     short ss;
     unsigned short uss;
     unsigned long ull;
@@ -147,7 +148,7 @@ int read_bmp_file_header(char *file_name,bmpfileheader *file_header)
  * bitmapheader *bmp_header - cabecalho da imagem */
 int read_bmp_header(char *file_name,bitmapheader *bmp_header)
 {
-    char buffer[10]; long ll; short ss;
+    char buffer[10]; long ll;
     unsigned short uss; unsigned long ull;
     FILE *fp;
     if((fp = fopen(file_name,"rb")) == NULL)
@@ -205,12 +206,7 @@ int read_bmp_header(char *file_name,bitmapheader *bmp_header)
  *  pixel **imagem - matriz de pixel da imagem          */
 pixel *read_bmp_image(char *file_name,pixel *array,bmpfileheader file_header,bitmapheader bmheader)
 {
-    FILE *fp;
-    int x, y, pad = 0, place = 0, i;
-    long colors = 0, height = 0, width = 0, position = 0;
-    char buffer[10];
-    unsigned char uc;
-    long ll;
+    long height = 0, width = 0;
     width = bmheader.width;
     height = bmheader.height;
     if(height < 0){height *= (-1);}
@@ -229,17 +225,9 @@ pixel *read_bmp_image(char *file_name,pixel *array,bmpfileheader file_header,bit
  *  pixel **imagem - matriz de pixel da imagem          */
 int read_bmp_image_rgb(char *file_name,bmpfileheader file_header,bitmapheader bmheader,int **red,int **blue,int **green)
 {
-    FILE *fp;
-    int x, y, pad = 0, place = 0, i;
-    long colors = 0, height = 0, width = 0, position = 0;
-    char buffer[10];
-    unsigned char uc;
-    long ll;
-    width = bmheader.width;
-    height = bmheader.height;
-    if(height < 0){height *= (-1);}
     if(bmheader.compression){exit(1);}
-    read_bmp_rgb(file_name,file_header,bmheader,&red,&blue,&green);
+    read_bmp_rgb(file_name,file_header,bmheader,&(*red),&(*blue),&(*green));
+    return 1;
 }
 
 /* calculte_pad(...)                                         *
@@ -299,6 +287,7 @@ pxMat createPixelMatriz(int row,int column)
     matriz.column = column;
     matriz.row    = row;
     matriz.image  = allocate_image_array(row,column);
+    return matriz;
 }
 
 unsigned long calcSize(int width,int height,int offset,int pad)
@@ -314,10 +303,6 @@ unsigned long sizebmp(int width,int height)
 int write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,pixel *imagem)
 {
     char buffer[10];
-    long ll;
-    short ss;
-    unsigned short uss;
-    unsigned long ull;
     FILE *fp;
     int x, y, pad, position;
     long width  = (*bmp_header).width;
@@ -390,10 +375,6 @@ int write_bmp(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_heade
 int write_bmp_rgb(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_header,int **red,int **blue,int **green)
 {
     char buffer[10] = {0,0,0,0,0,0,0,0,0,0};
-    long ll;
-    short ss;
-    unsigned short uss;
-    unsigned long ull;
     FILE *fp;
     int x = 0, y = 0, pad = 0, position = 0;
     int width  = bmp_header -> width;
@@ -456,4 +437,5 @@ int write_bmp_rgb(char *file_name,bmpfileheader *file_header,bitmapheader *bmp_h
         }
     }
     fclose(fp);
+    return 1;
 }

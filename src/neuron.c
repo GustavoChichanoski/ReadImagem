@@ -18,14 +18,18 @@ void neuron_insert_img(int img_height, int img_width, int input_size, int kernel
     {
         (*l)         = n_temp;
         (*l) -> prev = n_temp;
+        (*l) -> next = n_temp;
         return;
     }
-    while(n_last -> next != NULL)
+    do
     {
         n_last = n_last -> next;
     }
+    while(n_last != (*l));
     n_temp -> prev = n_last;
+    n_temp -> next = (*l);
     n_last -> next = n_temp;
+    (*l)   -> prev = n_temp;
 }
 
 void neuron_malloc(CNN_Neuron **neuron)
@@ -80,17 +84,16 @@ void neuron_out(CNN_Neuron **neuron,int img_width,int img_height,int kernel_size
     }
 }
 
-void neuron_insert(int img_height, int img_width,int out_height, int out_width, int kernel_size, int input_size, int type, CNN_Neuron **l)
+void neuron_insert(int img_height, int img_width,int out_height, int out_width, int kernel_size, int input_size, int type, CNN_Neuron **n)
 {
     CNN_Neuron    *n_temp;
     CNN_Neuron    *n_last;
     CNN_Dendritic *d_temp;
     dendritic_malloc(&d_temp);
     neuron_malloc(&n_temp);
-    n_last              = (*l);
+    n_last              = (*n);
     n_temp -> bias      = random_number(_ONE,ONE);
     n_temp -> out       = malloc(img_height * img_width * sizeof(int));
-    n_last -> dendritic = malloc(sizeof(CNN_Dendritic));
     if(type == CONV)
     {
         for(int i = 0;i < input_size;i++)
@@ -106,10 +109,19 @@ void neuron_insert(int img_height, int img_width,int out_height, int out_width, 
         }
     }
     n_temp -> dendritic = d_temp;
-    while(n_last -> next != NULL)
+    if((*n) -> prev == NULL)
+    {
+        (*n)         = n_temp;
+        (*n) -> next = n_temp;
+        (*n) -> prev = n_temp;
+        return;
+    }
+    while(n_last -> next != (*n))
     {
         n_last = n_last -> next;
     }
-    n_temp -> prev = n_last;
     n_last -> next = n_temp;
+    n_temp -> prev = n_last;
+    n_temp -> next = (*n);
+    (*n)   -> prev = n_temp;
 }

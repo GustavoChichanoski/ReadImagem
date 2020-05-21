@@ -109,4 +109,6 @@ pixel *calcular_histogrma(imagem,histograma,maxLinha,maxColuna)
         }
     }
 
+    return histograma;
+
 }

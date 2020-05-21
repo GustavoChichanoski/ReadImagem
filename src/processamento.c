@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "../include/conversao.h"
-#include "../include/bmp.h"
-#include "../include/operacaoPixel.h"
 #include "../include/processamento.h"
 
 // pixel *detectorBorda(long width,long height,pixel **rgb);
@@ -10,13 +5,12 @@
 // pixel *median_filter(long width,long height,pixel **rgb);
 // pixel *sub_image(pixel **in,pixel **out,long cols,long rows);
 pixel *gray_image(long width,long height,pixel *rgb);
+void img_creat_red_to_blue(int *img,int maxPosition,int **red,int **blue,int **green);
 
 pixel *gray_imagem(long width,long height,pixel *rgb)
 {
-    
     int posicao = 0;
     long luminosity = 0;
-    
     for(posicao = 0;posicao < width*height;posicao++)
     {
         luminosity += 3*rgb[posicao].red/10;
@@ -24,7 +18,27 @@ pixel *gray_imagem(long width,long height,pixel *rgb)
         luminosity += 11*rgb[posicao].blue/100;
         rgb[posicao] = igualarCorPixel(luminosity);
     }
-    
     return rgb;
-    
+}
+
+void img_creat_red_to_blue(int *img,int maxPosition,int **red,int **blue,int **green)
+{
+    int min = img[0];
+    int max = img[0];
+    for(int i = 0;i < maxPosition;i++)
+    {
+        min = (min > img[i]) ? img[i] : min;
+        max = (max < img[i]) ? img[i] : max;
+    }
+    if(min == 0 || max == 0)
+    {
+        min = 1;
+        max = 1;
+    }
+    for(int i = 0;i < maxPosition;i++)
+    {
+        (*red)[i]   = (img[i] <  0) ? 0 : (img[i]*255)/min;
+        (*blue)[i]  = (img[i] > -1) ? 0 : (img[i]*255)/max;
+        (*green)[i] = 0;
+    }
 }

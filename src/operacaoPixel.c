@@ -188,11 +188,9 @@ pxMat rotate_90_rigth(pxMat img)
     saida.column = img.row;
     saida.row = img.column;
     saida.image = allocate_image_array(saida.row,saida.column);
-    int rotate_x, rotate_y, k;
-    k = img.row - 1;
-    for (rotate_y = 0;rotate_y < img.column;rotate_y++)
+    for (int rotate_y = 0;rotate_y < img.column;rotate_y++)
     {
-        for (rotate_x = 0;rotate_x < img.row;rotate_x++)
+        for (int rotate_x = 0;rotate_x < img.row;rotate_x++)
         {
             saida.image[rotate_y*img.row + rotate_x] = img.image[rotate_x*img.column + img.column - 1 - rotate_y];
         }

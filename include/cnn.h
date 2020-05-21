@@ -1,18 +1,19 @@
 #pragma once
 
+#ifdef CNN_EXPORTS
+    #define CNN_API __declspec(dllexport)
+#else
+    #define CNN_API __declspec(dllimport)
+#endif
+
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-#include "cnn.h"
-#include "neuron.h"
+#include "conversao.h"
 #include "dendritic.h"
+#include "neuron.h"
 #include "pooling.h"
-
-#define  POOL    0
-#define  CONV    1
-#define  RELU    2
-#define  ONE   255
-#define _ONE  -256
+#include "conversao.h"
 
 struct cnnLayer
 {
@@ -37,4 +38,3 @@ void layer_calc_conv(CNN_Neuron **n,int width,int height,int kernel_size);
 void layer_calc_neuron(CNN_Layer **l,int type);
 void layer_insert(int kernel_size,int neuron_number,int type,CNN_Layer **l);
 void layer_insert_img(int img_height, int img_width,int kernel_size,int neuron_number,int input_number,int *red,int *blue,int *green,CNN_Layer **l);
-void convolucaoInt(int *img, int img_width,int img_height,int *kernel,int kernel_degree,int **out,int stride);
