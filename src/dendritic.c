@@ -23,7 +23,7 @@ void dendritic_insert_img(int *img,int img_width,int img_height,int kernel_size,
     {
         if(i < kernel_size * kernel_size)
         {
-            d -> kernel[i] = random_number(_ONE,ONE);
+            d -> kernel[i] = random_number(2 * _ONE,2 * ONE);
         }
         d -> img[i] = img[i];
     }
@@ -58,7 +58,7 @@ void dendritic_insert(int img_height,int img_width,int out_height,int out_width,
         temp -> kernel       = malloc(core * sizeof(int));
         for (int i = 0;i < core;i++)
         {
-            temp -> kernel[i] = random_number(_ONE,ONE);
+            temp -> kernel[i] = random_number(_ONE * 10,ONE * 10);
         }
     }
     if((*l) -> prev == NULL)
@@ -89,19 +89,16 @@ void dendritic_malloc(CNN_Dendritic **dendritic)
 
 void convolucaoInt(int *img,int img_width,int img_height,int *kernel,int kernel_degree,int **out,int stride)
 {
-    int kernel_x, kernel_y, kernel_med = kernel_degree / 2, kernel_pos = 0;
-    int img_x, img_y, img_x_new, img_y_new, img_pos_new;
-    int out_pos = 0;
-    int soma = 0;
-    int v_k = 0;
-    int v_i = 0;
+    int kernel_x = 0, kernel_y = 0, kernel_med = kernel_degree / 2, kernel_pos = 0;
+    int img_x = 0, img_y = 0, img_x_new = 0, img_y_new = 0, img_pos_new = 0;
+    int out_pos = 0, v_i = 0, v_k = 0, soma = 0;
     for (img_y = 0;img_y < img_height;img_y += stride)
     {
         for (img_x = 0;img_x < img_width;img_x += stride)
         {
             (*out)[out_pos] = 0;
+            kernel_pos      = 0;
             soma = 0;
-            kernel_pos = 0;
             for(kernel_y = -kernel_med;kernel_y < kernel_med + 1;kernel_y++)
             {
                 for(kernel_x = -kernel_med;kernel_x < kernel_med + 1;kernel_x++)
@@ -111,9 +108,9 @@ void convolucaoInt(int *img,int img_width,int img_height,int *kernel,int kernel_
                     if(img_y_new > -1 && img_y_new < img_height && img_x_new > -1 && img_x_new < img_width)
                     {
                         img_pos_new      = img_y_new * img_width + img_x_new;
-                        v_k = kernel[kernel_pos];
                         v_i = img[img_pos_new];
-                        soma            += kernel[kernel_pos] * img[img_pos_new] / ONE;
+                        v_k = kernel[kernel_pos];
+                        soma += v_i*v_k / ONE;
                         (*out)[out_pos] += kernel[kernel_pos] * img[img_pos_new] / ONE;
                     }
                     kernel_pos++;

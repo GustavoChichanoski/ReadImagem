@@ -10,6 +10,7 @@
 #include "../include/neuralNetwork.h"
 #include "../include/fft.h"
 #include "../include/processamento.h"
+#include <string.h>
 
 int main(int argc,char *argv[])
 {
@@ -22,7 +23,7 @@ int main(int argc,char *argv[])
     bitmapheader  bmp_header;
     CNN_Layer *l;
     layer_malloc(&l);
-    file_image = ".\\img\\expresso_1.bmp";
+    file_image  = ".\\img\\cat.bmp";
     file_image2 = ".\\img\\gal_teste.bmp";
     srand(time(NULL));
     if(read_bmp_file_header(file_image,&file_header))
@@ -62,17 +63,27 @@ int main(int argc,char *argv[])
     CNN_Layer *last;
     CNN_Neuron *n_last;
     last = l;
+    int num_layer = 0;
+    int num_neuron = 0;
+    int type = 0;
+    char str[30] = ".\\img\\cnn\\CNN_0_0_0.bmp\0";
     do
     {
         n_last = last -> neuron;
+        num_neuron = 0;
         do
         {
+            str[14] = (char) (num_layer    + 48);
+            str[16] = (char) (num_neuron   + 48);
+            str[18] = (char) (last -> type + 48);
             img_creat_red_to_blue(n_last -> out,(last -> out_height)*(last -> out_width),&red,&blue,&green);
-            bmp_header.width = last -> out_width;
+            bmp_header.width  = last -> out_width;
             bmp_header.height = last -> out_height;
-            write_bmp_rgb(file_image2,&file_header,&bmp_header,&red,&blue,&green);
+            write_bmp_rgb(str,&file_header,&bmp_header,&red,&blue,&green);
             n_last = n_last -> next;
+            num_neuron++;
         } while (n_last != last -> neuron);
+        num_layer++;
         last = last -> next;
     } while (last != l);
     free(l);

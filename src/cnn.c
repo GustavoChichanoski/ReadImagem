@@ -1,7 +1,5 @@
 #include "../include/cnn.h"
 
-void layer_calc_neuron(CNN_Layer **l,int type);
-
 void split_image(int **img, int **split_image, int width, int height, int kernel_size, int img_position_y, int img_position_x)
 {
     int i, j, split_position = 0;
@@ -37,10 +35,10 @@ void layer_insert_img(int img_height,int img_width,int kernel_size,int neuron_nu
     l_temp -> img_width     = img_width;
     l_temp -> out_height    = img_height;
     l_temp -> out_width     = img_width;
-    l_temp -> input_number  = 3;
+    l_temp -> input_number  = input_number;
     l_temp -> kernel_size   = kernel_size;
     l_temp -> neuron_number = neuron_number;
-    for(int i = 0;i < neuron_number;i++)
+    for(int i = 0;i < l_temp -> neuron_number;i++)
     {
         neuron_insert_img(img_height,img_width,input_number,kernel_size,red,blue,green,&n_temp);
     }
@@ -79,7 +77,6 @@ void layer_insert(int kernel_size, int neuron_number, int type, CNN_Layer **l)
     CNN_Neuron    *n_temp;
     CNN_Neuron    *n_last;
     CNN_Dendritic *d_temp;
-    CNN_Dendritic *d_last;
     layer_malloc(&l_temp);
     l_last = (*l);
     while(l_last -> next != (*l))
@@ -89,11 +86,23 @@ void layer_insert(int kernel_size, int neuron_number, int type, CNN_Layer **l)
     l_temp -> type           = type;
     l_temp -> img_height     = l_last -> out_height;
     l_temp -> img_width      = l_last -> out_width;
-    l_temp -> out_height     = (type == POOL) ? l_last -> out_height / 2 + 1 : l_last -> out_height;
-    l_temp -> out_width      = (type == POOL) ? l_last -> out_width  / 2 + 1 : l_last -> out_width;
     l_temp -> input_number   = l_last -> neuron_number;
     l_temp -> kernel_size    = kernel_size;
     l_temp -> neuron_number  = (type == CONV) ? neuron_number : l_last -> neuron_number;
+    if(type == POOL)
+    {
+        if(l_last -> out_height % 2 == 0)
+        {
+            l_temp -> out_height = l_last -> out_height/2;
+            l_temp -> out_width  = l_last -> out_width /2;
+        } else {
+            l_temp -> out_height = (l_last -> out_height/2) + 1;
+            l_temp -> out_width  = (l_last -> out_width /2) + 1;
+        }
+    } else {
+        l_temp -> out_height = l_last -> out_height;
+        l_temp -> out_width  = l_last -> out_width ;
+    }
     for(int i = 0;i < l_temp -> neuron_number;i++)
     {
         neuron_insert(l_temp -> img_height,l_temp -> img_width,l_temp -> out_height,l_temp -> out_width,kernel_size,l_last -> neuron_number,type,&(l_temp -> neuron));
@@ -101,34 +110,36 @@ void layer_insert(int kernel_size, int neuron_number, int type, CNN_Layer **l)
     if(type == CONV)
     {
         /* Apontando para a anterior */
-        n_last = l_temp -> neuron;
+        n_temp = l_temp -> neuron; /* Neuronio atual */
         do
         {
-            d_last = n_last -> dendritic;
-            n_temp = l_last -> neuron;
+            d_temp = n_temp -> dendritic; /* Dentrito atual*/
+            n_last = l_last -> neuron;    /* Neuronio da camada anterior */
             do
             {
-                d_last -> img = n_temp -> out;
-                n_temp        = n_temp -> next;
-                d_last = d_last -> next;
-            } while (d_last != n_last -> dendritic);
-            n_last = n_last -> next;
-        } while (n_last != l_temp -> neuron);
+                d_temp -> img = n_last -> out;        /* Imagem do dentrito atual recebe a saida do neuronio da camada anterior */
+                d_temp        = d_temp -> next;       /* Proximo dentrito */
+                n_last        = n_last -> next;       /* Proximo neuronio da camada anterior */
+            } while (n_last  != l_last -> neuron); /* Verifica se voltou para o começo */
+            n_temp = n_temp -> next;
+        } while (n_temp != l_temp -> neuron);
     } else {
-        n_last = l_last -> neuron;
         n_temp = l_temp -> neuron;
-        d_temp = n_temp -> dendritic;
         do
         {
-            d_temp -> img       = n_last -> out;
-            n_temp -> dendritic = d_temp;
-            n_last              = n_last -> next;
-            n_temp              = n_temp -> next;
-        } while (n_last != l_last -> neuron);
-        l_temp -> neuron = n_temp;
+            d_temp = n_temp -> dendritic;
+            n_last = l_last -> neuron;
+            do
+            {
+                d_temp -> img = n_last -> out;
+                d_temp = d_temp -> next;
+                n_last = n_last -> next;
+            } while (d_temp != n_temp -> dendritic);
+            n_temp = n_temp -> next;
+        } while (n_temp != l_temp -> neuron);
     }
+    l_last -> next = l_temp;
     l_temp -> prev = l_last;
     l_temp -> next = (*l);
-    l_last -> next = l_temp;
     (*l)   -> prev = l_temp;
 }

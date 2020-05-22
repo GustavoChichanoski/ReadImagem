@@ -1,19 +1,18 @@
 #include "../include/cnn_exec.h"
 
-void layer_calc_pool(CNN_Neuron **n,int width,int height);
+void layer_calc_pool(CNN_Neuron **n,int width,int height,int *out_height, int *out_width);
 void layer_calc_relu(CNN_Neuron **n,int width,int height);
 void layer_calc_conv(CNN_Neuron **n,int width,int height,int kernel_size);
 void layer_calc_neuron(CNN_Layer **l,int type);
 void layer_calc(CNN_Layer **l);
 
-void layer_calc_pool(CNN_Neuron **n,int width,int height)
+void layer_calc_pool(CNN_Neuron **n,int width,int height,int *out_height, int *out_width)
 {
     CNN_Neuron *n_last;
     n_last = (*n);
-    int img_width, img_height;
     do
     {
-        poolingInt(1,n_last -> dendritic -> img,width,height,&(n_last -> out),&img_width,&img_height);
+        poolingInt(1,n_last -> dendritic -> img,width,height,&(n_last -> out),&out_width,&out_height);
         n_last = n_last -> next;
     }
     while(n_last -> next != (*n));
@@ -21,18 +20,24 @@ void layer_calc_pool(CNN_Neuron **n,int width,int height)
 
 void layer_calc_relu(CNN_Neuron **n,int width,int height)
 {
+    int valor;
     CNN_Neuron *n_last;
     n_last = (*n);
     do
     {
         for(int i = 0;i < width * height;i++)
         {
-            int valor = n_last -> dendritic -> img[i];
-            n_last -> out[i] = (valor > -1) ? valor : 0;
+            valor            = n_last -> dendritic -> img[i];
+            if(valor < 0)
+            {
+                n_last -> out[i] = 0;
+            } else {
+                n_last -> out[i] = valor;
+            }
         }
         n_last = n_last -> next;
     }
-    while(n_last -> next != (*n));
+    while(n_last != (*n));
 }
 
 void layer_calc_conv(CNN_Neuron **n,int width,int height,int kernel_size)
@@ -78,7 +83,7 @@ void layer_calc_neuron(CNN_Layer **l,int type)
         }
         if(type == POOL)
         {
-            layer_calc_pool(&n,(*l) -> img_width,(*l) -> img_height);
+            layer_calc_pool(&n,(*l) -> img_width,(*l) -> img_height,(*l) -> out_height,(*l) -> out_width);
         }
         n = n -> next;
     } while(n != (*l) -> neuron);

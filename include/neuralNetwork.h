@@ -4,24 +4,18 @@
 #include <stdio.h>
 #include "bmp.h"
 #include "operacaoMatriz.h"
+#include "cnn.h"
 
-struct layer
+struct rnn_layer
 {
-    Matriz weight;
-    Matriz input;
-    Matriz output;
-    int    height;
-    int    width;
-    struct layer *next;
+    int neuron_number;
+    int *kernel;
+    int *output;
+    struct rnn_layer  *next;
+    struct rnn_layer  *prev;
 };
 
-typedef struct layer Layer;
+typedef struct rnn_layer  rnn_layer;
+typedef struct rnn_neuron rnn_neuron;
 
-int    random_number (int min_num,int max_num);
-int    floorSqrt     (int erro);
-int    floorSqrt     (int erro);
-pixel  rootMeanSquare(pixel *error,int neurons);
-Matriz calcErro      (Matriz real,int *setpoint);
-Matriz setup_weight  (Matriz weigths);
-int    removeLayer(Layer *l,int index);
-pxMat  setupKernel(pxMat weigths);
+int random_number (int min_num,int max_num);

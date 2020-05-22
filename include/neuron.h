@@ -7,14 +7,15 @@
 #include "neuralNetwork.h"
 #include "conversao.h"
 
-typedef struct cnnNeuron
+struct cnnNeuron
 {
     int                  bias;
     int                 *out;
     struct cnnDendritic *dendritic;
     struct cnnNeuron    *next;
     struct cnnNeuron    *prev;
-} CNN_Neuron;
+};
+typedef struct cnnNeuron CNN_Neuron;
 
 void neuron_malloc(CNN_Neuron **neuron);
 void neuron_out(CNN_Neuron **neuron,int img_width,int img_height,int kernel_size);

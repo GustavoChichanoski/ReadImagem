@@ -8,7 +8,7 @@
 #include "dendritic.h"
 #include "pooling.h"
 
-void layer_calc_pool(CNN_Neuron **n,int width,int height);
+void layer_calc_pool(CNN_Neuron **n,int width,int height,int *out_height, int *out_width);
 void layer_calc_relu(CNN_Neuron **n,int width,int height);
 void layer_calc_conv(CNN_Neuron **n,int width,int height,int kernel_size);
 void layer_calc_neuron(CNN_Layer **l,int type);

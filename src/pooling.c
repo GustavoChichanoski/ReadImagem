@@ -142,14 +142,14 @@ void poolingInt(int stride,int *img,int img_width,int img_height,int **out,int *
     int max_valor;
     int column = 0, row = 0;
     int pos_x = 0, pos_y = 0, i = 0, j = 0, out_x = 0, out_y = 0;
-    column = (img_width / stride) + 1;
-    row    = (img_height / stride) + 1;
+    column = (img_width  % 2 != 0) ? (img_width  / 2) + 1 : img_width  / 2;
+    row    = (img_height % 2 != 0) ? (img_height / 2) + 1 : img_height / 2;
     (*out_height) = row;
     (*out_width)  = column;
     (*out) = (int *) malloc(row * column * sizeof(int));
-    for (pos_y = 0; pos_y < img_height; pos_y = pos_y + stride)
+    for (pos_y = 0; pos_y < img_height; pos_y = pos_y + 2)
     {
-        for (pos_x = 0; pos_x < img_width;pos_x = pos_x + stride)
+        for (pos_x = 0; pos_x < img_width;pos_x = pos_x + 2)
         {
             max_valor = img[pos_y * img_width + pos_x];
             for (i = pos_x; i < pos_x + stride && i < img_width;i++)
