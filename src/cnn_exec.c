@@ -12,7 +12,7 @@ void layer_calc_pool(CNN_Neuron **n,int width,int height,int *out_height, int *o
     n_last = (*n);
     do
     {
-        poolingInt(1,n_last -> dendritic -> img,width,height,&(n_last -> out),&out_width,&out_height);
+        poolingInt(1,n_last -> dendritic -> img,width,height,&(n_last -> out),out_width,out_height);
         n_last = n_last -> next;
     }
     while(n_last -> next != (*n));
@@ -83,7 +83,7 @@ void layer_calc_neuron(CNN_Layer **l,int type)
         }
         if(type == POOL)
         {
-            layer_calc_pool(&n,(*l) -> img_width,(*l) -> img_height,(*l) -> out_height,(*l) -> out_width);
+            layer_calc_pool(&n,(*l) -> img_width,(*l) -> img_height,&((*l) -> out_height),&((*l) -> out_width));
         }
         n = n -> next;
     } while(n != (*l) -> neuron);
@@ -100,3 +100,61 @@ void layer_calc(CNN_Layer **l)
     }
     while(l_last != (*l));
 }
+
+/*
+The backward computation for a convolution function
+
+Arguments:
+dH    -- gradient of the cost with respect to output of the conv layer (H), numpy array of shape (n_H, n_W) assuming channels = 1
+cache -- cache of values needed for the conv_backward(), output of conv_forward()
+
+Returns:
+dX -- gradient of the cost with respect to input of the conv layer (X), numpy array of shape (n_H_prev, n_W_prev) assuming channels = 1
+dW -- gradient of the cost with respect to the weights of the conv layer (W), numpy array of shape (f,f) assuming single filter
+*/
+/* Retrieving information from the "cache" */
+// void cnn_conv_backward(CNN_Layer **l,int **dH)
+// {
+//     CNN_Neuron    *n_temp;
+//     CNN_Dendritic *d_temp;
+//     int *dH, *dX;
+//     dH = malloc((*l) -> kernel_size * (*l) -> kernel_size * sizeof(int));
+//     n_temp = (*l) -> neuron;
+//     d_temp = n_temp -> dendritic;
+
+// }
+
+void cnn_rotate180(int *kernel,int kernel_size,int **k_r)
+{
+    k_r = malloc(kernel_size * kernel_size * sizeof(int));
+    for (int i = 0;i < kernel_size;i++)
+    {
+        for (int j = 0;j < kernel_size;j++)
+        {
+            (*k_r)[(kernel_size - i - 1)*kernel_size + (kernel_size - j - 1)] = kernel[i*kernel_size + j];
+        }
+    }
+}
+
+    // // (X, W) = cache
+    
+    // /*Retrieving dimensions from X's shape */
+    // (n_H_prev, n_W_prev) = X.shape
+    
+    // # Retrieving dimensions from W's shape
+    // (f, f) = W.shape
+    
+    // # Retrieving dimensions from dH's shape
+    // (n_H, n_W) = dH.shape
+    
+    // # Initializing dX, dW with the correct shapes
+    // dX = np.zeros(X.shape)
+    // dW = np.zeros(W.shape)
+    
+    // # Looping over vertical(h) and horizontal(w) axis of the output
+    // for h in range(n_H):
+    //     for w in range(n_W):
+    //         dX[h:h+f, w:w+f] += W * dH(h,w)
+    //         dW += X[h:h+f, w:w+f] * dH(h,w)
+    
+    // return dX, dW

@@ -182,3 +182,21 @@ pixel medPixel(pixel MaximoAnterior, pixel ImagemAtual)
     MaximoAnterior.green = (MaximoAnterior.green + ImagemAtual.green) / 2;
     return MaximoAnterior;
 }
+
+void upsample(int *img,int **out,int i_width,int i_height,int o_width,int o_height,int stride)
+{
+    o_height = i_height * 2;
+    for (int i = 0;i < i_height;i++)
+    {
+        for (int j = 0;j < i_width;j++)
+        {
+            for(int k = i;k < i + stride && k < o_height;k++)
+            {
+                for(int l = j;j < j + stride && l < o_width;j++)
+                {
+                    (*out)[k*o_width + l] = img[i*i_width + j];
+                }
+            }
+        }
+    }
+}

@@ -23,19 +23,19 @@ pixel *gray_imagem(long width,long height,pixel *rgb)
 
 void img_creat_red_to_blue(int *img,int maxPosition,int **red,int **blue,int **green)
 {
-    int min = -255;
-    int max = 255;
+    int min = _ONE;
+    int max = ONE;
     for(int i = 0;i < maxPosition;i++)
     {
-        min = (min > img[i] && img[i] >  255) ? img[i] : min;
-        max = (max < img[i] && img[i] < -255) ? img[i] : max;
+        min = (min > img[i] && img[i] >  ONE) ? img[i] : min;
+        max = (max < img[i] && img[i] < _ONE) ? img[i] : max;
     }
     min = (min == 0) ? 1 : min;
     max = (max == 0) ? 1 : max;
     for(int i = 0;i < maxPosition;i++)
     {
-        (*red)[i]   = (img[i] > 0) ? 0 : (img[i]*255)/min;
-        (*blue)[i]  = (img[i] < 0) ? 0 : (img[i]*255)/max;
+        (*red)[i]   = (img[i] > 0) ? 0 : (img[i]*ONE)/min;
+        (*blue)[i]  = (img[i] < 0) ? 0 : (img[i]*ONE)/max;
         (*green)[i] = 0;
     }
 }

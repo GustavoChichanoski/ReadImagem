@@ -19,8 +19,9 @@
 #define  POOL             0
 #define  CONV             1
 #define  RELU             2
-#define  ONE              255
-#define _ONE              -256
+#define  LR               400
+#define  ONE              4095
+#define _ONE              -4095
 
 
 /* Armazena duas variaveis no mesmo espaco da memoria */

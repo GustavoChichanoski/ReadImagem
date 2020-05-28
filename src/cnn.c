@@ -1,5 +1,7 @@
 #include "../include/cnn.h"
 
+void flip(int *w,int **out,int w_width,int w_height);
+
 void split_image(int **img, int **split_image, int width, int height, int kernel_size, int img_position_y, int img_position_x)
 {
     int i, j, split_position = 0;
@@ -142,4 +144,32 @@ void layer_insert(int kernel_size, int neuron_number, int type, CNN_Layer **l)
     l_temp -> prev = l_last;
     l_temp -> next = (*l);
     (*l)   -> prev = l_temp;
+}
+
+// void cnn_s(int *kernel,int *img,int **s,int img_width,int img_height,int kernel_size,int s_width,int s_height)
+// {
+//     for(int i = 0;i < s_height;i++)
+//     {
+//         for(int j = 0;j < s_width;j++)
+//         {
+//             for(int n = 1;n < kernel_size;n++)
+//             {
+//                 for(int m = 1;m < kernel_size;m++)
+//                 {
+//                     s[i*s_width + j] = kernel[(kernel_size - m)*kernel_size + (kernel_size - n)] * img[img_width*(i - 1 + m) + (j - 1 + n)];
+//                 }
+//             }
+//         }
+//     }
+// }
+
+void flip(int *w,int **out,int w_width,int w_height)
+{
+    for (int i = 0;i < w_height;i++)
+    {
+        for (int j = 0;j < w_width;j++)
+        {
+            (*out)[(w_width - j)*w_width + (w_height - i)] = w[i*w_width + j];
+        }
+    }
 }

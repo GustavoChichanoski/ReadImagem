@@ -8,7 +8,7 @@ SRC     := ./src
 SRCS    := $(wildcard $(SRC)/*.c)
 OBJS    := $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(SRCS))
 EXE     := $(BIN)/main.exe
-CFLAGS  := -I$(INCLUDE) -O0 -g3 -Wall
+CFLAGS  := -I$(INCLUDE) -g3 -Wall
 LDLIBS  := -lm
 
 ifeq ($(OS),Windows_NT)
@@ -41,3 +41,5 @@ run: $(EXE)
 clean:
 	if exist obj $(RMDIR) obj
 	if exist bin $(RMDIR) bin
+	if exist "img\cnn" $(RMDIR) "img\cnn"
+	$(MKDIR) "img\cnn"

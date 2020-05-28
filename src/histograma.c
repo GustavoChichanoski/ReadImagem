@@ -16,15 +16,13 @@ pixel  cumulativeDistribuiton(pixel *histograma,int N)
 
     pixel saida;
 
-    for(int i = 0;i < 256;i++)
+    for(int i = 0;i < ONE;i++)
     {
         saida.blue  += histograma[i].blue;
         saida.green += histograma[i].green;
         saida.red   += histograma[i].red;
     }
-
-    return divPixelporCnt(saida,255);
-
+    return divPixelporCnt(saida,ONE);
 }
 
 /* Funcao que suaviza o histograma obtido                  *
