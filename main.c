@@ -1,15 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../include/conversao.h"
-#include "../include/bmp.h"
-#include "../include/detectores.h"
-#include "../include/cnn.h"
-#include "../include/cnn_exec.h"
-#include "../include/operacaoMatriz.h"
-#include "../include/neuralNetwork.h"
-#include "../include/fft.h"
-#include "../include/processamento.h"
+#include "../include/images/conversao.h"
+#include "../include/images/bmp.h"
+#include "../include/images/detectores.h"
+#include "../include/nn/cnn.h"
+#include "../include/nn/cnn_exec.h"
+#include "../include/utils/operacaoMatriz.h"
+#include "../include/nn/neuralNetwork.h"
+#include "../include/images/processamento.h"
 
 int main(int argc,char *argv[])
 {
@@ -67,7 +66,7 @@ int main(int argc,char *argv[])
         n_last = last -> neuron;
         do
         {
-            img_creat_red_to_blue(n_last -> out,(last -> out_height)*(last -> out_width),&red,&blue,&green);
+            img_create_red_to_blue(n_last -> out,(last -> out_height)*(last -> out_width),&red,&blue,&green);
             bmp_header.width = last -> out_width;
             bmp_header.height = last -> out_height;
             write_bmp_rgb(file_image2,&file_header,&bmp_header,&red,&blue,&green);

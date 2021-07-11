@@ -1,12 +1,16 @@
 MKDIR   := md
 RMDIR   := rd /S /Q
 CC      := gcc
-BIN     := ./bin
-OBJ     := ./obj
-INCLUDE := ./include
-SRC     := ./src
-SRCS    := $(wildcard $(SRC)/*.c)
-OBJS    := $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(SRCS))
+
+SHELL := /bin/sh	
+
+BIN_DIR := ./bin
+OBJ_DIR := ./obj
+INC_DIR := ./include
+SRC_DIR := ./src
+
+SRCS    := $(wildcard $(SRC_DIR)/*/*.c)
+OBJS    := $(patsubst $(OBJ_DIR),$(SRC_DIR),$(SRCS))
 EXE     := $(BIN)/main.exe
 CFLAGS  := -I$(INCLUDE) -O0 -g3 -Wall
 LDLIBS  := -lm
@@ -21,7 +25,9 @@ endif
 
 .PHONY: all run clean build
 
-all : clean $(EXE)
+all :
+	@echo "Iniciando"
+	@echo $(OBJS)
 
 gdb : all
 	gdb ./bin/main.exe
